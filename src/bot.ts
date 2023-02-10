@@ -10,9 +10,6 @@ import './features/i18n';
 new ExtendedClient({
     intents: [
         Intents.Guilds,
-        Intents.GuildMessages,
-        Intents.MessageContent,
-        Intents.GuildMembers,
     ],
     partials: [
         Partials.Message,

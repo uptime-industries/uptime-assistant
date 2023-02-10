@@ -1,16 +1,14 @@
 # en-US
 ## Chat Commands
-### Ping
-ping-name = ping
-ping-description = Replies with Pong
-ping-reply = Pong
-ping-button = Ping
+### backer
+backer-name = backer
+backer-description = Get Backer role with code
+backer-code-name = code
+backer-code-description = Challenge Code
+backer-reply-success = {-b}Code Validated:{-b} you now have the backer role
+backer-reply-failed = {-b}Code validation faild{-b} Please check that your code is typed corectly
 
-## Context Menus
-### Avatar
-avatar-name = Display Avatar
-avatar-embed = Avatar for {$username}
-
-### Count Characters
-count-name = Count characters
-count-reply = {-b}{$username}{-b}'s message has {-cl}{$length}{-cl} characters.
+### kickstarter
+kickstarter-name = kickstarter
+kickstarter-description = Link to the Kickstarter
+kickstarter-reply = Time Left <>

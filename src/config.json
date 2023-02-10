@@ -1,14 +1,15 @@
 {
-    "guild": "your_guild_id",
+    "guild": "1038425229300613150",
     "interactions": {
         "receiveMessageComponents": true,
         "receiveModals": true,
         "replyOnError": true,
         "splitCustomId": false,
-        "useGuildCommands": true
+        "useGuildCommands": false
     },
     "colors": {
         "embed": "#2f3136"
     },
+    "backerRole": "1073396938138980432",
     "restVersion": "10"
 }

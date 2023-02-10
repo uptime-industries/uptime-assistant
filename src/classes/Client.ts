@@ -31,6 +31,7 @@ interface Config {
     colors: {
         embed: ColorResolvable
     },
+    backerRole: Snowflake,
     restVersion: '10'
 }
 /**
