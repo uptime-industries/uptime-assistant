@@ -31,4 +31,4 @@ Rules =
 tos = Discord Terms of Service
 guidelines = Discord Community Guidelines
 
-socials-twitter = Twitter
+welcome = We are thrilled to have you join our community. Here, we're all about learning, collaborating, and networking with fellow tech enthusiasts. Whether you're a pro or a beginner, we're a welcoming community that shares a passion for all things tech. Come join us and let's explore the world of technology together!

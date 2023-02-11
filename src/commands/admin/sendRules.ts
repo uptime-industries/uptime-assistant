@@ -1,12 +1,13 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageActionRowComponentBuilder, PermissionsBitField, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { kickstarterButton } from '../../features/buttons';
+import { fallback } from '../../features/i18n';
 import { ChatInputCommand } from '../../interfaces';
 
 const command:ChatInputCommand = {
     options: new SlashCommandBuilder()
-        .setName('info')
-        .setDescription('info messages')
-        .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
+        .setName('welcome')
+        .setDescription('Welcome messages')
+        .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
         .setDMPermission(false)
         .addChannelOption(option => option
             .setName('channel')
@@ -20,7 +21,7 @@ const command:ChatInputCommand = {
         await channel.send({
             embeds:[new EmbedBuilder()
                 .setTitle('Welcome to the Uptime Lab Discord')
-                .setDescription('We are so excited to have you join us!.')
+                .setDescription(fallback('welcome'))
                 .setColor(client.config.colors.embed)],
             components:[new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(new ButtonBuilder()
