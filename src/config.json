@@ -4,7 +4,7 @@
         "receiveMessageComponents": true,
         "receiveModals": true,
         "replyOnError": true,
-        "splitCustomId": false,
+        "splitCustomId": true,
         "useGuildCommands": false
     },
     "colors": {
