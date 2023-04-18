@@ -1,4 +1,4 @@
-import { GuildMemberRoleManager, SlashCommandBuilder } from 'discord.js';
+import { GuildMemberRoleManager } from 'discord.js';
 import i18n, { fallback, localization } from '../features/i18n';
 import { ChatInputCommand } from '../classes/Command';
 
@@ -20,7 +20,7 @@ export default new ChatInputCommand()
         let content = 'backer-reply-failed';
         if (interaction.inGuild() && interaction.member.roles instanceof GuildMemberRoleManager && process.env.CODE == interaction.options.getString(fallback('backer-code-name'), true)) {
             content = 'backer-reply-success';
-            interaction.member.roles.add(interaction.client.config.backerRole, 'Backer Code Validated');
+            interaction.member.roles.add(process.env.ROLE_BACKER_ROLE_ID, 'Backer Code Validated');
         }
         interaction.reply({
             content: i18n(interaction.locale, content),
