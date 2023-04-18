@@ -1,16 +1,22 @@
 import { DiscordjsError, GatewayIntentBits as Intents, Partials } from 'discord.js';
-import ExtendedClient from './classes/Client';
+import ExtendedClient, { ClientConfig } from './classes/Client';
 import { config } from 'dotenv';
+import configJSON from './config.json';
 
 // Load .env file contents
 config();
 import './features/i18n';
+import path from 'path';
 
 // Initialization (specify intents and partials)
 new ExtendedClient({
     intents: [
         Intents.Guilds,
         Intents.GuildMessages,
+        Intents.GuildVoiceStates,
+        Intents.MessageContent,
+        Intents.GuildMembers,
+        Intents.GuildModeration,
     ],
     partials: [
         Partials.Message,
@@ -18,6 +24,13 @@ new ExtendedClient({
         Partials.Reaction,
         Partials.GuildMember,
     ],
+    eventPath: path.join(__dirname, 'events'),
+    commandPath: path.join(__dirname, 'commands'),
+    contextMenuPath: path.join(__dirname, 'context_menus'),
+    buttonPath: path.join(__dirname, 'interactions', 'buttons'),
+    selectMenuPath: path.join(__dirname, 'interactions', 'select_menus'),
+    modalPath: path.join(__dirname, 'interactions', 'modals'),
+    clientConfig: configJSON as ClientConfig,
 }).login(process.env.TOKEN)
     .catch((err:unknown) => {
         if (err instanceof DiscordjsError) {

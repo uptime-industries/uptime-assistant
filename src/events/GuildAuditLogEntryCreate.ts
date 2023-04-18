@@ -11,22 +11,22 @@ export default new Event()
 
 async function execute(auditLogEntry:GuildAuditLogsEntry, guild:Guild) {
     const LeaveChannel = guild.channels.cache.find((_c, k) => k == channelID) as ThreadChannel;
-    const executor = auditLogEntry.executor;
+    // const executor = auditLogEntry.executor;
     const target = auditLogEntry.target;
     const change = auditLogEntry.changes;
     // console.log(auditLogEntry);
     if (auditLogEntry.action == AuditLogEvent.MemberBanAdd && (target instanceof User)) {
-        const avatarURL = target.avatarURL({ forceStatic: true }) || undefined;
+        const avatarURL = target.avatarURL({ forceStatic: true });
         console.log(auditLogEntry);
         LeaveChannel.send({
             embeds:[
                 new EmbedBuilder()
-                    .setAuthor({ name: target.tag, iconURL: avatarURL })
+                    .setAuthor({ name: target.tag, iconURL: (avatarURL || undefined) })
                     .setTitle('Member Banned')
-                    .setFields(
+                    .addFields(
                         { name: 'Banned By', value: `<@${auditLogEntry.executorId}>`, inline: true },
-                        { name: 'Reason', value: auditLogEntry.reason, inline: true },
-                    )
+                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                        { name: 'Reason', value: auditLogEntry.reason!, inline: true })
                     .setThumbnail(avatarURL)
                     .setColor(Colors.Red)
                     .setTimestamp(auditLogEntry.createdAt),
@@ -38,11 +38,11 @@ async function execute(auditLogEntry:GuildAuditLogsEntry, guild:Guild) {
         LeaveChannel.send({
             embeds:[
                 new EmbedBuilder()
-                    .setAuthor({ name: target.tag, iconURL: avatarURL })
+                    .setAuthor({ name: target.tag, iconURL: (avatarURL || undefined) })
                     .setTitle('Member Kicked')
                     .setFields(
                         { name: 'Kicked By', value: `<@${auditLogEntry.executorId}>`, inline: true },
-                        { name: 'Reason', value: auditLogEntry.reason, inline: true },
+                        // { name: 'Reason', value: auditLogEntry.reason, inline: true },
                     )
                     .setThumbnail(avatarURL)
                     .setColor(Colors.Red)
@@ -58,8 +58,8 @@ async function execute(auditLogEntry:GuildAuditLogsEntry, guild:Guild) {
         const timeoutChannel = guild.channels.cache.find((_c, k) => k == timeoutChannelID) as ThreadChannel;
         const avatarURL = target.avatarURL({ forceStatic: true });
 
-        const newDate = change[0].new ? new Date((change[0].new as string)) : undefined;
-        const oldDate = change[0].old ? new Date((change[0].old as string)) : undefined;
+        const newDate = change[0].new ? new Date((change[0].new as string)) : new Date();
+        // const oldDate = change[0].old ? new Date((change[0].old as string)) : undefined;
         const title = 'Member Timed Out';
         const color = Colors.LuminousVividPink;
         const reason = auditLogEntry.reason || 'No Reason Given';
@@ -67,7 +67,7 @@ async function execute(auditLogEntry:GuildAuditLogsEntry, guild:Guild) {
         timeoutChannel.send({
             embeds:[
                 new EmbedBuilder()
-                    .setAuthor({ name: target.tag, iconURL: avatarURL })
+                    .setAuthor({ name: target.tag, iconURL: (avatarURL || undefined) })
                     .setTitle(title)
                     .addFields(
                         { name: 'Action By', value:`<@${auditLogEntry.executorId}>`, inline:true },

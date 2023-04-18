@@ -9,13 +9,12 @@ export default new ContextMenuCommand()
         .setDMPermission(false)
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages))
     .setGlobal(true)
-    .setExecute(execute);
+    .setExecute(async (interaction:UserContextMenuCommandInteraction) => {
+        if (interaction.targetUser.system || interaction.targetUser.bot) {
+            interaction.reply({ content:'This user is a bot and can not be reported', ephemeral:true });
+            return;
+        }
+        interaction.showModal(reportModal
+            .setCustomId(`report_u_${interaction.targetUser.id}`));
+    });
 
-async function execute(interaction:UserContextMenuCommandInteraction) {
-    if (interaction.targetUser.system || interaction.targetUser.bot) {
-        interaction.reply({ content:'This user is a bot and can not be reported', ephemeral:true });
-        return;
-    }
-    interaction.showModal(reportModal
-        .setCustomId(`report_u_${interaction.targetUser.id}`));
-}

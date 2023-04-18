@@ -1,10 +1,9 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageActionRowComponentBuilder, PermissionsBitField, SlashCommandBuilder, TextChannel } from 'discord.js';
-import { kickstarterButton } from '../../features/buttons';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageActionRowComponentBuilder, PermissionsBitField, TextChannel } from 'discord.js';
 import { fallback } from '../../features/i18n';
-import { ChatInputCommand } from '../../interfaces';
+import { ChatInputCommand } from '../../classes/Command';
 
-const command:ChatInputCommand = {
-    options: new SlashCommandBuilder()
+export default new ChatInputCommand()
+    .setBuilder((builder) => builder
         .setName('welcome')
         .setDescription('Welcome messages')
         .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild)
@@ -12,16 +11,16 @@ const command:ChatInputCommand = {
         .addChannelOption(option => option
             .setName('channel')
             .setDescription('Channel where to send message')
-            .setRequired(true)),
-    global:true,
-    async execute(client, interaction) {
+            .setRequired(true)))
+    .setGlobal(true)
+    .setExecute(async (interaction) => {
         const channel = interaction.options.getChannel('channel', true);
         if (!(channel instanceof TextChannel)) { return; }
         await channel.send({
             embeds:[new EmbedBuilder()
                 .setTitle('Welcome to the Uptime Lab Discord')
                 .setDescription(fallback('welcome'))
-                .setColor(client.config.colors.embed)
+                .setColor(interaction.client.config.colors.embed)
                 .setImage('https://cdn.discordapp.com/attachments/1014458643816661083/1073779941252022313/b681a17ca10c3fa31c05fa2b440e3640.png')],
             components:[new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(new ButtonBuilder()
@@ -38,10 +37,7 @@ const command:ChatInputCommand = {
                     .setLabel('Website')
                     .setEmoji('🌐')
                     .setURL('https://uplab.pro/')
-                    .setStyle(ButtonStyle.Link))
-                .addComponents(kickstarterButton(interaction))],
+                    .setStyle(ButtonStyle.Link))],
         });
         interaction.reply({ content:`messages sent to ${channel}`, ephemeral:true });
-    },
-};
-export default command;
+    });

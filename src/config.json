@@ -3,13 +3,13 @@
     "interactions": {
         "receiveMessageComponents": true,
         "receiveModals": true,
+        "receiveAutocomplete": true,
         "replyOnError": true,
         "splitCustomId": true,
         "useGuildCommands": false
     },
     "colors": {
-        "embed": "#2f3136"
+        "embed": "#2b2d31"
     },
-    "backerRole": "1073396938138980432",
     "restVersion": "10"
 }
