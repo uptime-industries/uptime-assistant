@@ -5,6 +5,7 @@ export default new Interaction<ButtonInteraction>()
     .setName('moderatename')
     .setExecute(async (interaction) => {
         const args = interaction.customId.split('_');
+        // console.log(args);
         const isY = args[1] == 'y';
         const isN = args[1] == 'n';
         const targetID = isY || isN ? args[2] : args[1];
@@ -29,6 +30,7 @@ export default new Interaction<ButtonInteraction>()
                     else if (err.code == 50013) {
                         interaction.update({
                             content:`Bot does not have permissions to moderate the nickname of ${member}`,
+                            components: [],
                         });
                     }
                 });
