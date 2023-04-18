@@ -1,9 +1,8 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
-import { Button } from '../../interfaces';
-
-const button:Button = {
-    name:'socials',
-    async execute(_client, interaction) {
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
+import { Interaction } from '../../classes/Interaction';
+export default new Interaction<ButtonInteraction>()
+    .setName('socials')
+    .setExecute(async (interaction) => {
         interaction.reply({
             components:[new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(new ButtonBuilder()
@@ -54,6 +53,4 @@ const button:Button = {
                     .setStyle(ButtonStyle.Link))],
             ephemeral:true,
         });
-    },
-};
-export default button;
+    });

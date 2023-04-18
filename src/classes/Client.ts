@@ -1,8 +1,10 @@
-import { ApplicationCommand, Client, ClientOptions, Collection, ColorResolvable, REST, RESTPostAPIApplicationCommandsJSONBody, Routes, Snowflake } from 'discord.js';
-import { AnySelectMenu, Button, ChatInputCommand, Command, ContextMenu, Event, Interaction, ModalSubmit } from '../interfaces';
-import configJSON from '../config.json';
+import { AnySelectMenuInteraction, ApplicationCommand, ButtonInteraction, Client, ClientOptions, Collection, ColorResolvable, ModalSubmitInteraction, REST,
+    RESTPostAPIApplicationCommandsJSONBody, Routes, Snowflake } from 'discord.js';
 import path from 'path';
 import { readdirSync } from 'fs';
+import { ChatInputCommand, CommandOptions, ContextMenuCommand } from './Command';
+import { Event } from './Event';
+import { Interaction, InteractionOptions } from './Interaction';
 
 // TypeScript or JavaScript environment (thanks to https://github.com/stijnvdkolk)
 let tsNodeRun = false;
@@ -16,24 +18,36 @@ try {
 catch (e) {
     /* empty */
 }
+
 /**
  * Type Definitions for config
  */
-interface Config {
+export interface ClientConfig {
     guild: Snowflake | 'your_guild_id',
     interactions: {
         receiveMessageComponents: boolean,
         receiveModals: boolean,
+        receiveAutocomplete: boolean,
         replyOnError: boolean,
         splitCustomId: boolean,
         useGuildCommands: boolean
     },
     colors: {
-        embed: ColorResolvable
+        embed: ColorResolvable,
     },
-    backerRole: Snowflake,
     restVersion: '10'
 }
+
+export interface ExtendedClientOptions extends ClientOptions {
+    commandPath?:string,
+    contextMenuPath?:string,
+    buttonPath?:string,
+    selectMenuPath?:string,
+    modalPath?:string,
+    eventPath:string,
+    clientConfig:ClientConfig,
+}
+
 /**
  * ExtendedClient is extends frome `Discord.js`'s Client
  */
@@ -43,76 +57,86 @@ export default class ExtendedClient extends Client {
      * Collection of Chat Input Commands
      */
     readonly commands: Collection<string, ChatInputCommand>;
+
     /**
      * Collection of Context Menu Commands
      */
-    readonly contextMenus: Collection<string, ContextMenu>;
+    readonly contextMenus: Collection<string, ContextMenuCommand>;
+
     /**
      * Collection of Events
      */
     readonly events: Collection<string, Event> = new Collection();
+
     /**
      * Collection of Button Interactions
      */
-    readonly buttons: Collection<string, Button>;
+    readonly buttons: Collection<string, Interaction<ButtonInteraction>>;
+
     /**
      * Collection of Select Menu Interactions
      */
-    readonly selectMenus: Collection<string, AnySelectMenu>;
+    readonly selectMenus: Collection<string, Interaction<AnySelectMenuInteraction>>;
+
     /**
      * Collection of Modal Submit Interactions
      */
-    readonly modals: Collection<string, ModalSubmit>;
+    readonly modals: Collection<string, Interaction<ModalSubmitInteraction>>;
+
     /**
      * Config File
      */
-    readonly config:Config = configJSON as Config;
+    readonly config:ClientConfig;
 
     /**
      *
      * @param options Options for the client
      * @see https://discord.js.org/#/docs/discord.js/main/typedef/ClientOptions
      */
-    constructor(options:ClientOptions) {
+    constructor(options:ExtendedClientOptions) {
         super(options);
 
         console.log('\nStarting up...\n');
 
         // Paths
-        const commandPath = path.join(__dirname, '..', 'commands'),
-            contextMenuPath = path.join(__dirname, '..', 'context_menus'),
-            buttonPath = path.join(__dirname, '..', 'interactions', 'buttons'),
-            selectMenuPath = path.join(__dirname, '..', 'interactions', 'select_menus'),
-            modalPath = path.join(__dirname, '..', 'interactions', 'modals'),
-            eventPath = path.join(__dirname, '..', 'events');
+        const commandPath = options.commandPath,
+            contextMenuPath = options.contextMenuPath,
+            buttonPath = options.buttonPath,
+            selectMenuPath = options.selectMenuPath,
+            modalPath = options.modalPath,
+            eventPath = options.eventPath;
+        this.config = options.clientConfig;
 
         // Command Handler
-        this.commands = fileToCollection<ChatInputCommand>(commandPath);
+        if (commandPath) this.commands = fileToCollection<ChatInputCommand>(commandPath);
 
         // Context Menu Handler
-        this.contextMenus = fileToCollection<ContextMenu>(contextMenuPath);
+        if (contextMenuPath) this.contextMenus = fileToCollection<ContextMenuCommand>(contextMenuPath);
 
         // Interaction Handlers
         // Button Handler
-        this.buttons = fileToCollection<Button>(buttonPath);
+        if (buttonPath) this.buttons = fileToCollection<Interaction<ButtonInteraction>>(buttonPath);
 
         // Select Menu Handler
-        this.selectMenus = fileToCollection<AnySelectMenu>(selectMenuPath);
+        if (selectMenuPath) this.selectMenus = fileToCollection<Interaction<AnySelectMenuInteraction>>(selectMenuPath);
 
         // Modal Handler
-        this.modals = fileToCollection<ModalSubmit>(modalPath);
+        if (modalPath) this.modals = fileToCollection<Interaction<ModalSubmitInteraction>>(modalPath);
 
         // Event Handler
         readdirSync(eventPath).filter((dir) => dir.endsWith(tsNodeRun ? '.ts' : '.js')).forEach((file) => import(path.join(eventPath, file))
             .then((event: { default: Event }) => {
 
+                // console.log(event.default);
+
                 this.events.set(event.default.name, event.default);
 
-                if (event.default.once) { this.once(event.default.name, (...args) => event.default.execute(this, ...args)); }
-                else { this.on(event.default.name, (...args) => event.default.execute(this, ...args)); }
+                if (event.default.once) { this.once(event.default.name, (...args) => event.default.execute(...args)); }
+                else { this.on(event.default.name, (...args) => event.default.execute(...args)); }
             }),
         );
     }
+
     /**
      * Deploy Application Commands to Discord
      * @see https://discord.com/developers/docs/interactions/application-commands
@@ -122,11 +146,15 @@ export default class ExtendedClient extends Client {
         if (!this.token) { return console.warn('[Error] Token not present at command deployment'); }
 
         const rest = new REST({ version: this.config.restVersion }).setToken(this.token),
-            globalDeploy:RESTPostAPIApplicationCommandsJSONBody[] = (Array.from(this.commands.filter(cmd => cmd.global === true).values()).map(m => m.options.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[])
-                .concat(Array.from(this.contextMenus.filter(cmd => cmd.global === true).values()).map(m => m.options.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[]),
+            globalDeploy:RESTPostAPIApplicationCommandsJSONBody[] = (Array.from(this.commands.filter(cmd => cmd.global === true).values())
+                .map(m => m.builder.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[])
+                .concat(Array.from(this.contextMenus.filter(cmd => cmd.global === true).values())
+                    .map(m => m.builder.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[]),
 
-            guildDeploy:RESTPostAPIApplicationCommandsJSONBody[] = (Array.from(this.commands.filter(cmd => cmd.global === false).values()).map(m => m.options.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[])
-                .concat(Array.from(this.contextMenus.filter(cmd => cmd.global === false).values()).map(m => m.options.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[]);
+            guildDeploy:RESTPostAPIApplicationCommandsJSONBody[] = (Array.from(this.commands.filter(cmd => cmd.global === false).values())
+                .map(m => m.builder.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[])
+                .concat(Array.from(this.contextMenus.filter(cmd => cmd.global === false).values())
+                    .map(m => m.builder.toJSON()) as RESTPostAPIApplicationCommandsJSONBody[]);
 
         console.log('[INFO] Deploying commands...');
 
@@ -158,7 +186,7 @@ export default class ExtendedClient extends Client {
  * @param dirPath Root directory of object
  * @returns Collection of Type
  */
-function fileToCollection<Type extends Command | Interaction>(dirPath:string):Collection<string, Type> {
+function fileToCollection<Type extends CommandOptions | InteractionOptions>(dirPath:string):Collection<string, Type> {
 
     const collection:Collection<string, Type> = new Collection();
 
@@ -169,14 +197,18 @@ function fileToCollection<Type extends Command | Interaction>(dirPath:string):Co
             const directoryPath = path.join(dirPath, dir.name);
             readdirSync(directoryPath).filter((file) => file.endsWith(tsNodeRun ? '.ts' : '.js')).forEach((file) => {
                 import(path.join(directoryPath, file)).then((resp: { default: Type }) => {
-                    collection.set(((resp.default as Command).options != undefined) ? (resp.default as Command).options.name : (resp.default as Interaction).name, resp.default);
+                    collection.set(((resp.default as CommandOptions).builder != undefined)
+                        ? (resp.default as CommandOptions).builder.name
+                        : (resp.default as InteractionOptions).name, resp.default);
                 });
             });
         });
 
         dirents.filter(dirent => !dirent.isDirectory() && dirent.name.endsWith(tsNodeRun ? '.ts' : '.js')).forEach((file) => {
             import(path.join(dirPath, file.name)).then((resp: { default: Type }) => {
-                collection.set(((resp.default as Command).options != undefined) ? (resp.default as Command).options.name : (resp.default as Interaction).name, resp.default);
+                collection.set(((resp.default as CommandOptions).builder != undefined)
+                    ? (resp.default as CommandOptions).builder.name
+                    : (resp.default as InteractionOptions).name, resp.default);
             });
         });
     }
@@ -198,4 +230,15 @@ function fileToCollection<Type extends Command | Interaction>(dirPath:string):Co
  */
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
     return error instanceof Error;
+}
+
+declare module 'discord.js' {
+    interface BaseInteraction { client: ExtendedClient}
+    interface Component { client: ExtendedClient }
+    interface Message { client: ExtendedClient }
+    interface BaseChannel { client: ExtendedClient }
+    interface Role { client: ExtendedClient }
+    interface Guild { client: ExtendedClient }
+	interface User { client: ExtendedClient }
+	interface GuildMember { client: ExtendedClient }
 }

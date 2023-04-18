@@ -1,13 +1,12 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageActionRowComponentBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, EmbedBuilder, MessageActionRowComponentBuilder } from 'discord.js';
 import i18n from '../../features/i18n';
-import { Button } from '../../interfaces';
-
-const button:Button = {
-    name:'rules',
-    async execute(client, interaction) {
+import { Interaction } from '../../classes/Interaction';
+export default new Interaction<ButtonInteraction>()
+    .setName('rules')
+    .setExecute(async (interaction) => {
         interaction.reply({
             embeds:[new EmbedBuilder()
-                .setColor(client.config.colors.embed)
+                .setColor(interaction.client.config.colors.embed)
                 .setTitle(`📜 ${i18n(interaction.locale, 'Rules-title')}`)
                 .setDescription(i18n(interaction.locale, 'Rules'))],
             components:[new ActionRowBuilder<MessageActionRowComponentBuilder>()
@@ -21,6 +20,4 @@ const button:Button = {
                     .setLabel(i18n(interaction.locale, 'guidelines')))],
             ephemeral:true,
         });
-    },
-};
-export default button;
+    });

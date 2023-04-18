@@ -1,12 +1,10 @@
-import { Events, Message } from 'discord.js';
-import { Event } from '../interfaces';
+import { Events } from 'discord.js';
+import Event from '../classes/Event';
 
-const event:Event = {
-    name:Events.MessageCreate,
-    async execute(_client, message:Message) {
-        if (message.channelId == '1070911769083658280') {
+export default new Event()
+    .setName(Events.MessageCreate)
+    .setExecute(async (message) => {
+        if (message.channelId == process.env.USER_INTRODUCTION_ID) {
             message.react('👋');
         }
-    },
-};
-export default event;
+    });
