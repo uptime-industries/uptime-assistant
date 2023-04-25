@@ -17,10 +17,6 @@ Bot is based on [TypeScript Discord bot template](https://github.com/ppauel/type
 - User Join and leave logging
 - User timeout logging
 
-## Planned Features
-
-- Backer Linked Role
-
 ## Setup
 
 See [TypeScript Discord bot template](https://github.com/ppauel/typescript-discord-bot) README for set up instructions
