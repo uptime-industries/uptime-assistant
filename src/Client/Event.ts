@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ClientEvents as DiscordClientEvents } from 'discord.js';
-import { Mutable } from './Types';
+import { Mutable } from './types';
 
 /**
  * Event Class
  */
 export class Event {
     readonly name: keyof DiscordClientEvents;
+
     readonly once: boolean;
+
     public execute: (...args: any[]) => Promise<void>;
-    constructor(options?:Partial<Event>) {
+
+    constructor(options?: Partial<Event>) {
         if (!options) return;
         if (options.name) this.name = options.name;
-        this.once = options.once == undefined ? false : true;
+        this.once = options.once === undefined ? false : options.once;
         if (options.execute) this.execute = options.execute;
     }
 
@@ -26,7 +29,7 @@ export class Event {
         return this;
     }
 
-    public setExecute(execute:((...args: any[]) => Promise<void>)) {
+    public setExecute(execute: (...args: any[]) => Promise<void>) {
         this.execute = execute;
         return this;
     }

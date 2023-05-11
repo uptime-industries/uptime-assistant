@@ -1,6 +1,5 @@
 import { AuditLogEvent, Colors, EmbedBuilder, Events, Guild, GuildAuditLogsEntry, ThreadChannel, User } from 'discord.js';
-import Event from '../classes/Event';
-import { timeFormate } from '../features/time';
+import { Event, timeFormate } from '../Client';
 
 const channelID = process.env.USER_WELCOME_CHANNEL_ID;
 const timeoutChannelID = process.env.TIMEOUT_CHANNEL_ID;

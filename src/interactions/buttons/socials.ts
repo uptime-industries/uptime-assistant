@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, MessageActionRowComponentBuilder } from 'discord.js';
-import { Interaction } from '../../classes/Interaction';
+import { Interaction } from '../../Client';
 export default new Interaction<ButtonInteraction>()
     .setName('socials')
     .setExecute(async (interaction) => {

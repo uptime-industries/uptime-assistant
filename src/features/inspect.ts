@@ -1,5 +1,5 @@
 import { ButtonBuilder, ButtonStyle, codeBlock, ColorResolvable, EmbedBuilder, GuildMember, User } from 'discord.js';
-import { timeFormate } from './time';
+import { timeFormate } from '../Client';
 
 export async function userEmbed(member:GuildMember, colors: ColorResolvable) {
     const user = await member.user.fetch(true);

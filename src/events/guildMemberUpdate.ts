@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, Colors, Events, GuildMember, TextChannel } from 'discord.js';
-import Event from '../classes/Event';
+import { Event } from '../Client';
 import { moderateUserButton, userEmbed } from '../features/inspect';
 
 const welcomeChannelID = process.env.USE_JOIN_CHANNEL_ID;

@@ -1,5 +1,5 @@
 import { Events } from 'discord.js';
-import Event from '../classes/Event';
+import { Event } from '../Client';
 
 export default new Event()
     .setName(Events.MessageCreate)
