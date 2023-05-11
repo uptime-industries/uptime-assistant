@@ -41,4 +41,4 @@ client.login(process.env.TOKEN).then(() => {
 });
 
 // Rpi locator RSS
-rss(client);
+setInterval(() => {rss(client);}, 60 * 1000);
