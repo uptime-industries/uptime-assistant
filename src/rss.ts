@@ -23,6 +23,7 @@ async function handleNewRssItem(item: Parser.Item, avatarURL:string, client: Cli
     const embed = new EmbedBuilder()
         .setTitle(content[0])
         .setDescription(content[1])
+        .setColor('#d44e50')
         .setURL(item.link)
         .addFields(
             { name:'Location', value:`${getFlagEmoji(item.categories[1])}(${item.categories[1].toUpperCase()})`, inline:true },
@@ -40,13 +41,13 @@ export default (client: Client) => {
     // Schedule the function to run at a set interval to check for updates in the RSS feed
     scheduleJob('*/5 * * * *', async () => {
     // Parse the RSS feed
-        const feed = await parser.parseURL('https://rpilocator.com/feed/');
+        const feed = await parser.parseURL('https://rpilocator.com/feed/?cat=CM4');
 
         // Get the latest item from the RSS feed
         const latestItem = feed.items[0];
 
         // Check if the latest item is different from the previous one
-        if (latestItem !== previousItem && latestItem.categories[2] == 'CM4') {
+        if (latestItem !== previousItem) {
         // If it is, call the function to handle the new item
             handleNewRssItem(latestItem, feed.image.url, client);
             // Update the previous item to the latest one
