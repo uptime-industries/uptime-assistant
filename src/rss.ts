@@ -6,7 +6,7 @@ const parser = new Parser();
 // const webhookClient = new WebhookClient({ url: 'https://discordapp.com/api/webhooks/1106020579267584040/JsX0JYeT4WrltGbVxgm3Ry050nZ6l8NbUCb7g-HtLK50AIFm8o-NmmFfqSxqhzgwrOL0' });
 
 // Initialize the previous item variable to null
-let previousItemGuid: string | undefined;
+let previousItemGuid: string[] | undefined;
 
 function getFlagEmoji(countryCode: string): string {
     const codePoints = countryCode
@@ -45,12 +45,13 @@ export default async function checkForNewRSSItem(client: Client) {
 
     // Check if the latest item is different from the previous one
     // console.log(latestItem, previousItemGuid);
-    if (latestItem.guid !== previousItemGuid) {
+    if (previousItemGuid.includes(latestItem.guid)) {
 
         // If it is, call the function to handle the new item
         handleNewRssItem(latestItem, feed.image.url, client);
+
         // Update the previous item to the latest one
-        previousItemGuid = latestItem.guid;
+        previousItemGuid = feed.items.map((item) => item.guid);
     }
     return;
 }
