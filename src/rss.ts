@@ -45,7 +45,7 @@ export default async function checkForNewRSSItem(client: Client) {
 
     // Check if the latest item is different from the previous one
     // console.log(latestItem, previousItemGuid);
-    if (previousItemGuid.includes(latestItem.guid)) {
+    if (previousItemGuid != undefined && previousItemGuid.includes(latestItem.guid)) {
 
         // If it is, call the function to handle the new item
         handleNewRssItem(latestItem, feed.image.url, client);
