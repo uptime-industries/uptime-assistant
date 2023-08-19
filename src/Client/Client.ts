@@ -1,36 +1,37 @@
 /* eslint-disable no-console */
-import { join } from 'path';
-import { readdir } from 'fs/promises';
 import {
     AnySelectMenuInteraction,
+    ApplicationCommand,
     ButtonInteraction,
     Client,
     ClientOptions,
     Collection,
+    Interaction as DInteraction,
+    DiscordAPIError,
     DiscordjsError,
+    DiscordjsErrorCodes,
+    Events,
     ModalSubmitInteraction,
     REST,
     RESTPatchAPIApplicationCommandJSONBody,
     Routes,
     Snowflake,
-    Interaction as DInteraction,
-    ApplicationCommand,
-    Events,
-    DiscordjsErrorCodes,
 } from 'discord.js';
-
+import { readdir } from 'fs/promises';
+import { join } from 'path';
 import {
     ChatInputCommand, Command, ContextMenuCommand,
 } from './Command';
 import { Event } from './Event';
 import { Interaction } from './Interaction';
-
-import { Mutable } from './types';
 import { onInteractionCreate } from './interactionCreate';
+import { Mutable } from './types';
 
 // TypeScript or JavaScript environment (thanks to https://github.com/stijnvdkolk)
 export let tsNodeRun = false;
 try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     if (process[Symbol.for('ts-node.register.instance')]) {
         tsNodeRun = true;
     }
@@ -100,12 +101,6 @@ async function fileToCollection<Type extends Command | Interaction<DInteraction>
 }
 
 export interface ExtendedClientOptions extends ClientOptions {
-	commandPath?: string;
-	contextMenuPath?: string;
-	buttonPath?: string;
-	selectMenuPath?: string;
-	modalPath?: string;
-	eventPath: string;
 	receiveMessageComponents?: boolean;
 	receiveModals?: boolean;
 	receiveAutocomplete?: boolean;
@@ -113,6 +108,15 @@ export interface ExtendedClientOptions extends ClientOptions {
 	splitCustomID?: boolean;
 	splitCustomIDOn?: string;
 	useGuildCommands?: boolean;
+}
+
+export interface initOptions {
+	commandPath?: string;
+	contextMenuPath?: string;
+	buttonPath?: string;
+	selectMenuPath?: string;
+	modalPath?: string;
+	eventPath: string
 }
 
 /**
@@ -171,13 +175,20 @@ export class ExtendedClient extends Client {
 	 */
     readonly replyOnError: boolean;
 
+    /**
+	 * Whether the bot should split interactions' custom ids (Recommended `true`)
+	 */
     readonly splitCustomID: boolean;
 
+    /**
+	 * The sting that is used to split the custom id
+	 */
     readonly splitCustomIDOn: string;
 
-    readonly useGuildCommands: boolean;
-
-    private readonly extendedOptions: ExtendedClientOptions;
+    /**
+     * Checks if the init function has run
+     */
+    private hasInitRun = false;
 
     /**
 	 *
@@ -197,16 +208,7 @@ export class ExtendedClient extends Client {
             replyOnError,
             splitCustomID,
             splitCustomIDOn,
-            useGuildCommands,
-            eventPath,
-            selectMenuPath,
-            buttonPath,
-            modalPath,
-            commandPath,
-            contextMenuPath,
         } = options;
-
-        this.extendedOptions = options;
 
         // MICS configuration
         this.receiveMessageComponents = receiveMessageComponents === undefined ? false : receiveMessageComponents;
@@ -215,19 +217,24 @@ export class ExtendedClient extends Client {
         this.replyOnError = replyOnError === undefined ? false : replyOnError;
         this.splitCustomID = splitCustomID === undefined ? false : splitCustomID;
         this.splitCustomIDOn = splitCustomIDOn || '_';
-        this.useGuildCommands = useGuildCommands === undefined ? false : useGuildCommands;
 
         this.on(Events.InteractionCreate, onInteractionCreate);
         this.events.set(Events.InteractionCreate, new Event({ name: Events.InteractionCreate, execute: onInteractionCreate }));
 
-        Promise.all([
-            this.loadEvents(eventPath),
-            this.loadCommands(commandPath),
-            this.loadContextMenus(contextMenuPath),
-            this.loadButtons(buttonPath),
-            this.loadSelectMenus(selectMenuPath),
-            this.loadModals(modalPath),
-        ]);
+
+    }
+
+    public async init(options: initOptions) {
+
+        await Promise.all([
+            this.loadEvents(options.eventPath),
+            this.loadCommands(options.commandPath),
+            this.loadContextMenus(options.contextMenuPath),
+            this.loadButtons(options.buttonPath),
+            this.loadSelectMenus(options.selectMenuPath),
+            this.loadModals(options.modalPath),
+        ]).then(() => {this.hasInitRun = true;});
+        return this;
     }
 
     private async loadEvents(eventPath: string) {
@@ -283,38 +290,65 @@ export class ExtendedClient extends Client {
         (this as Mutable<ExtendedClient>).commands = await fileToCollection<ChatInputCommand>(path);
     }
 
-    // TODO: fix spelling
     /**
-	 * Deploy Application Commands to Discord
-	 * @param guild if commands debloys subset of commands that should only be deployed to a spific guild
-	 * @see https://discord.com/developers/docs/interactions/application-commands
-	 */
-    public async deploy(guild?: Snowflake) {
+ * Deploys the slash commands and context menu commands to Discord.
+ * @param guildId - The ID of the guild to deploy guild-specific commands to. If not provided, deploys global commands.
+ */
+    public async deploy(guildId?: Snowflake) {
+    // Check if the token is provided
         if (!this.token) {
             throw new DiscordjsError(DiscordjsErrorCodes.TokenMissing);
         }
 
         console.log('[INFO] Deploying commands...');
-        if (guild === undefined) {
-            // gets chat commands that are global
-            const globalDeploy: RESTPatchAPIApplicationCommandJSONBody[] = this.commands.filter((f) => f.isGlobal).map((m) => m.builder.toJSON());
 
-            // gets context menu commands that are global
-            globalDeploy.concat(this.contextMenus.filter((f) => f.isGlobal).map((m) => m.builder.toJSON()));
+        // Get the global chat input commands and convert them to JSON format
+        const globalDeploy: RESTPatchAPIApplicationCommandJSONBody[] = this.commands.filter((f) => f.isGlobal).map((m) => m.builder.toJSON());
 
-            // Put the JSON API object to the aplicationCommands endPoint
-            const pushedCommands = (await this.rest
-                .put(Routes.applicationCommands(this.user.id), { body: globalDeploy })
-                .catch(console.error)) as ApplicationCommand[];
+        // Get the global context menu commands and convert them to JSON format
+        globalDeploy.concat(this.contextMenus.filter((f) => f.isGlobal).map((m) => m.builder.toJSON()));
 
-            console.log(`[INFO] Deployed ${pushedCommands.length} global command(s)`);
-        }
-        else if (this.useGuildCommands) {
-            /** TODO: Guild commands */
+        // Deploy the global commands by sending a PUT request to the applicationCommands endpoint
+        const pushedCommands = (await this.rest
+            .put(Routes.applicationCommands(this.user.id), { body: globalDeploy })
+            .catch(console.error)) as ApplicationCommand[];
+
+        console.log(`[INFO] Deployed ${pushedCommands.length} global command(s)`);
+
+        // If guildId is provided, deploy guild-specific commands
+        if (guildId !== undefined) {
+        // Get the guild-specific chat input commands and convert them to JSON format
+            const guildDeploy: RESTPatchAPIApplicationCommandJSONBody[] = this.commands.filter((f) => !f.isGlobal).map((m) => m.builder.toJSON());
+            guildDeploy.concat(this.contextMenus.filter((f) => !f.isGlobal).map((m) => m.builder.toJSON()));
+
+            // Deploy the guild-specific commands by sending a PUT request to the applicationGuildCommands endpoint
+            const guildCommands = (await this.rest
+                .put(Routes.applicationGuildCommands(this.user.id, guildId), { body: guildDeploy })
+                .catch((err) => {
+                    if (!(err instanceof DiscordAPIError)) {
+                        console.error(err);
+                        return [];
+                    }
+                    else if (err.code === 50001) {
+                        console.error(`[Error] Bot is Missing Access to deploy guild commands to slected guild(${guildId})`);
+                        return [];
+                    }
+                    else {
+                        console.error(err);
+                        return [];
+                    }
+                })) as ApplicationCommand[];
+
+            console.log(`[INFO] Deployed ${guildCommands.length} guild command(s)`);
         }
     }
 
     public async login(token?: string): Promise<string> {
+        if (!this.hasInitRun) {
+            console.error('[ERROR] client.init() has not been completed');
+            return;
+        }
+
         (this as Mutable<ExtendedClient>).rest = this.rest.setToken(token);
         try {
             return super.login(token);

@@ -4,13 +4,22 @@ import {
 import {
     Collection, Locale, LocaleString,
 } from 'discord.js';
-import { readdirSync, readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 const locales = Object.values(Locale);
+
 export interface i18nOptions {
 	hasGlobal?: boolean;
 	fallback: Locale;
+}
+
+export interface tOptions {
+	key: string;
+	ns?: string;
+	ons?: string;
+	locale?: Locale | LocaleString;
+	args?: Record<string, FluentVariable>;
 }
 
 export class i18n {
@@ -42,30 +51,93 @@ export class i18n {
             });
     }
 
-    public t(key: string, locale: Locale | LocaleString, ns: string, args?: Record<string, FluentVariable>) {
+    public t(options: tOptions) {
+        const {
+            key, ons, args,
+        } = options;
+        const ns = options.ns === undefined ? 'common' : options.ns;
+        const locale = options.locale === undefined ? this.fallback : options.locale;
+
+        // Check if locale exists
         if (!this.lang.has(locale)) {
-            if (locale !== this.fallback) return this.t(key, this.fallback, ns, args);
-            return `{{${locale}}}`;
+            if (locale === this.fallback) {
+                throw Error(`Fallback locale [${locale}] Not present`);
+            }
+
+            return this.t({
+                key,
+                ns,
+                locale: this.fallback,
+                args,
+            });
         }
+
         const local = this.lang.get(locale);
+        // Checks if namespace is present
         if (!local.has(ns)) {
-            if (ns !== 'comman') return this.t(key, locale, 'comman', args);
-            return `{{${ns}}}`;
+            if (locale === this.fallback && ns === 'common') {
+                throw Error('common.ftl not found in fallback locale');
+            }
+
+            if (ns === 'common') {
+                return this.t({
+                    key,
+                    ns: ons,
+                    locale: this.fallback,
+                    args,
+                });
+            }
+
+            return this.t({
+                key,
+                ns: 'common',
+                ons: ns,
+                locale,
+                args,
+            });
         }
+
         const bundle = local.get(ns);
         const msg = bundle.getMessage(key);
-        if (!msg || !msg.value) {
-            if (ns !== 'comman') return this.t(key, locale, 'comman', args);
-            if (locale !== this.fallback) return this.t(key, this.fallback, ns, args);
-            console.log(`[warning] i18n - Could not resolve key: ${key}`);
-            return `{{${key}}}`;
+
+        // Checks if key value is present
+        if (!msg?.value) {
+            if (ns === 'common' && locale === this.fallback) {
+                throw Error(`${key} not found in common.ftl in fallback locale`);
+            }
+
+            if (ns === 'common') {
+                return this.t({
+                    key,
+                    ns: ons,
+                    locale: this.fallback,
+                    args,
+                });
+            }
+
+            if (locale === this.fallback) {
+                return this.t({
+                    key,
+                    ns: 'common',
+                    locale,
+                    args,
+                });
+            }
+
+            return this.t({
+                key,
+                ns: 'common',
+                ons: ns,
+                locale,
+                args,
+            });
         }
+
         const errors: Error[] = [];
         const res = bundle.formatPattern(msg.value, args, errors);
+
         if (errors.length) {
-            console.warn(`[Error] i18n - Errors with ${key}`);
-            console.log(args);
-            console.error(errors);
+            throw Error(`i18n - Errors with ${key}`, { cause: errors });
         }
 
         return res;
@@ -73,7 +145,7 @@ export class i18n {
 
     /**
 	 * Creates the collection of Collections for storing translations
-	 * @param locale The locale of the collaction being generated
+	 * @param locale The locale of the collection being generated
 	 */
     private createLocaleCollection(locale: LocaleString) {
         const path = join(this.path, locale);
@@ -86,6 +158,7 @@ export class i18n {
             bundle.addResource(new FluentResource(readFileSync(join(path, file), { encoding: 'utf-8' })));
             collection.set(file.slice(0, -4), bundle);
         }
+
         this.lang.set(locale, collection);
     }
 }
