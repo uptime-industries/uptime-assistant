@@ -137,7 +137,7 @@ export class i18n {
         const res = bundle.formatPattern(msg.value, args, errors);
 
         if (errors.length) {
-            throw Error(`i18n - Errors with ${key}`, { cause: errors });
+            throw Error(`i18n - Errors with ${key}`);
         }
 
         return res;

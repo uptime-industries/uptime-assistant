@@ -1,5 +1,5 @@
 import { AuditLogEvent, Colors, EmbedBuilder, Events, Guild, GuildAuditLogsEntry, ThreadChannel, User } from 'discord.js';
-import { Event, timeFormate } from '../Client';
+import { Event } from '../Client';
 
 const channelID = process.env.USER_WELCOME_CHANNEL_ID;
 const timeoutChannelID = process.env.TIMEOUT_CHANNEL_ID;
@@ -70,7 +70,7 @@ async function execute(auditLogEntry:GuildAuditLogsEntry, guild:Guild) {
                     .setTitle(title)
                     .addFields(
                         { name: 'Action By', value:`<@${auditLogEntry.executorId}>`, inline:true },
-                        { name: 'Expires At', value: `${timeFormate(newDate, 'F')}\n ${timeFormate(newDate, 'R')}`, inline:true },
+                        { name: 'Expires At', value: `${newDate.toDiscordString('F')}\n ${newDate.toDiscordString('R')}`, inline:true },
                         { name: 'Reason', value:reason },
                     )
                     .setColor(color)

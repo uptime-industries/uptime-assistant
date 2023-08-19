@@ -1,5 +1,5 @@
 import { ActionRowBuilder, bold, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, GuildMember, Message, MessageCreateOptions, ModalSubmitInteraction, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
-import { Interaction, timeFormate } from '../../Client';
+import { Interaction } from '../../Client';
 
 const reportChannelID = process.env.REPORT_CHANNEL_ID;
 
@@ -59,7 +59,7 @@ async function MessageReport(interaction:ModalSubmitInteraction, args: string[])
         .setThumbnail(member?.displayAvatarURL({ forceStatic:true, size: 1024 }) || member?.user.avatarURL({ forceStatic: true, size: 1024 }) || null)
         .setFields(
             { name: 'Channel', value: `${channel}`, inline: true },
-            { name: 'Date Posted', value: timeFormate(message.createdAt, 'F'), inline: true },
+            { name: 'Date Posted', value: message.createdAt.toDiscordString('F'), inline: true },
             { name: 'Content of Message', value: message.content },
             { name: 'Reported', value: `${member}`, inline: true },
             { name: 'Reported By', value: `${interaction.member}`, inline: true },
