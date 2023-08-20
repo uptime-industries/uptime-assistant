@@ -57,7 +57,6 @@ function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
  */
 async function fileToCollection<Type extends Command | Interaction<DInteraction>>(dirPath: string): Promise<Collection<string, Type>> {
     const collection: Collection<string, Type> = new Collection();
-
     try {
         const dirents = await readdir(dirPath, { withFileTypes: true });
         dirents
@@ -303,10 +302,10 @@ export class ExtendedClient extends Client {
         console.log('[INFO] Deploying commands...');
 
         // Get the global chat input commands and convert them to JSON format
-        const globalDeploy: RESTPatchAPIApplicationCommandJSONBody[] = this.commands.filter((f) => f.isGlobal).map((m) => m.builder.toJSON());
+        let globalDeploy: RESTPatchAPIApplicationCommandJSONBody[] = this.commands.filter((f) => f.isGlobal).map((m) => m.builder.toJSON());
 
         // Get the global context menu commands and convert them to JSON format
-        globalDeploy.concat(this.contextMenus.filter((f) => f.isGlobal).map((m) => m.builder.toJSON()));
+        globalDeploy = globalDeploy.concat(this.contextMenus.filter((f) => f.isGlobal).map((m) => m.builder.toJSON()));
 
         // Deploy the global commands by sending a PUT request to the applicationCommands endpoint
         const pushedCommands = (await this.rest
@@ -318,8 +317,8 @@ export class ExtendedClient extends Client {
         // If guildId is provided, deploy guild-specific commands
         if (guildId !== undefined) {
         // Get the guild-specific chat input commands and convert them to JSON format
-            const guildDeploy: RESTPatchAPIApplicationCommandJSONBody[] = this.commands.filter((f) => !f.isGlobal).map((m) => m.builder.toJSON());
-            guildDeploy.concat(this.contextMenus.filter((f) => !f.isGlobal).map((m) => m.builder.toJSON()));
+            let guildDeploy: RESTPatchAPIApplicationCommandJSONBody[] = this.commands.filter((f) => !f.isGlobal).map((m) => m.builder.toJSON());
+            guildDeploy = guildDeploy.concat(this.contextMenus.filter((f) => !f.isGlobal).map((m) => m.builder.toJSON()));
 
             // Deploy the guild-specific commands by sending a PUT request to the applicationGuildCommands endpoint
             const guildCommands = (await this.rest

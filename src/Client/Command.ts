@@ -44,7 +44,7 @@ export interface Command {
  */
 export class ChatInputCommand implements Command {
     readonly builder: ChatInputCommandBuilders;
-    readonly isGlobal: boolean;
+    readonly isGlobal: boolean = true;
 
     /**
 	 * Runs when the client receives an command interaction.
