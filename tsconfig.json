@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
-        "module": "CommonJS",
-        "moduleResolution": "Node",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "rootDir": "./src/",
-        "target": "ES6",
+        "target": "ESNEXT",
         "typeRoots": [
             "node_modules/@types"
         ],
@@ -13,6 +13,7 @@
         "experimentalDecorators": true,
         "forceConsistentCasingInFileNames": true,
         "importHelpers": true,
+        "isolatedModules": true,
         "noFallthroughCasesInSwitch": true,
         "removeComments": true,
         "resolveJsonModule": true,
@@ -22,7 +23,8 @@
         "strictPropertyInitialization": false,
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "eslint.config.js"
     ],
     "exclude": [
         "node_modules",

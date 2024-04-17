@@ -1,39 +1,35 @@
 {
   "name": "uptime-bot",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "A TypeScript Discord bot for discord server moderation",
-  "main": "bot.js",
+  "main": "./dist/bot.js",
+  "type": "module",
   "scripts": {
     "prestart": "npm run build",
     "start": "node ./dist/bot.js",
     "prebuild": "rimraf ./dist",
-    "build": "tsc",
-    "dev": "nodemon src/bot.ts"
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Uptime-Lab/Uptime-Bot.git"
   },
   "author": "bowenjw",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/Uptime-Lab/Uptime-Bot/issues"
   },
   "homepage": "https://github.com/Uptime-Lab/Uptime-Bot#readme",
   "dependencies": {
     "@fluent/bundle": "^0.18.0",
-    "discord.js": "^14.13.0",
-    "dotenv": "^16.3.1",
-    "rss-parser": "^3.13.0"
+    "discord.js": "^14.14.1"
   },
   "devDependencies": {
-    "@types/node": "^20.5.1",
-    "@types/node-schedule": "^2.1.0",
-    "@typescript-eslint/eslint-plugin": "^6.4.0",
-    "@typescript-eslint/parser": "^6.4.0",
-    "eslint": "^8.47.0",
-    "nodemon": "^3.0.1",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.1.6"
+    "@types/node": "^20.12.7",
+    "@types/node-schedule": "^2.1.7",
+    "@typescript-eslint/eslint-plugin": "^7.7.0",
+    "@typescript-eslint/parser": "^7.7.0",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
   }
 }
