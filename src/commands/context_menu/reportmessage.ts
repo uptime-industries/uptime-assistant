@@ -1,6 +1,6 @@
 import { ApplicationCommandType, MessageContextMenuCommandInteraction, PermissionFlagsBits } from 'discord.js';
-import { ContextMenuCommand } from '../../Client';
-import { reportModal } from '../../features/report';
+import { ContextMenuCommand } from '../../Classes/index.js';
+import { reportModal } from '../../features/report.js';
 
 export default new ContextMenuCommand()
     .setBuilder((builder) => builder
@@ -8,13 +8,13 @@ export default new ContextMenuCommand()
         .setType(ApplicationCommandType.Message)
         .setDMPermission(false)
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages))
-    .setGlobal(true)
     .setExecute(execute);
 
 async function execute(interaction:MessageContextMenuCommandInteraction) {
+    const { splitCustomIDOn } = interaction.client
     if (interaction.targetMessage.author.system || interaction.targetMessage.author.bot) {
         return interaction.reply({ content:'This message is from a bot and can not be reported', ephemeral:true });
     }
     return interaction.showModal(reportModal
-        .setCustomId(`report_m_${interaction.targetMessage.channelId}_${interaction.targetMessage.id}`));
+        .setCustomId(`report${splitCustomIDOn}m${splitCustomIDOn}${interaction.targetMessage.channelId}${splitCustomIDOn}${interaction.targetMessage.id}`));
 }

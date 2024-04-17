@@ -1,17 +1,19 @@
 import { ActionRowBuilder, bold, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, GuildMember, Message, MessageCreateOptions, ModalSubmitInteraction, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
-import { Interaction } from '../../Client';
+import { Interaction } from '../../Classes/index.js';
 
 const reportChannelID = process.env.REPORT_CHANNEL_ID;
 
 export default new Interaction<ModalSubmitInteraction>()
-    .setName('report')
-    .setExecute(execute);
+    .setCustomIdPrefix('report')
+    .setRun(execute);
 
 
 async function execute(interaction:ModalSubmitInteraction) {
+    
     interaction.reply({ content: 'Your report has been recived and will be reviewed', ephemeral: true });
-    const channel = interaction.guild?.channels.cache.find((_c, k) => k == reportChannelID) as ThreadChannel;
-    const args = interaction.customId.split('_');
+    const { splitCustomIDOn } = interaction.client
+    const channel = interaction.guild.channels.cache.find((_c, k) => k == reportChannelID) as ThreadChannel;
+    const args = interaction.customId.split(splitCustomIDOn);
     let message:MessageCreateOptions = { content: bold('Error') };
     switch (args[1]) {
     case 'm':
@@ -28,7 +30,7 @@ async function execute(interaction:ModalSubmitInteraction) {
 
 
 function userReport(interaction:ModalSubmitInteraction, args: string[]):MessageCreateOptions {
-    const member = interaction.guild?.members.cache.find((_m, k) => k == args[2]);
+    const member = interaction.guild.members.cache.find((_m, k) => k == args[2]);
     const comment = interaction.fields.getTextInputValue('comment') || 'No Additional Comment';
     if (!(member instanceof GuildMember)) {
         console.error('[Error] Member not found during report');
@@ -69,8 +71,9 @@ async function MessageReport(interaction:ModalSubmitInteraction, args: string[])
 }
 
 function reportRow(id:Snowflake, message?:Message) {
+    const { splitCustomIDOn } = message.client
     const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(instpct.setCustomId(`inspect_${id}`));
+        .addComponents(instpct.setCustomId(`inspect${splitCustomIDOn}${id}`));
     if (message) {
         return row.addComponents(link.setURL(message.url));
     }

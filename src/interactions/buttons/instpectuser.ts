@@ -1,10 +1,10 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction } from 'discord.js';
-import { Interaction } from '../../Client';
-import { moderateUserButton, userEmbed } from '../../features/inspect';
+import { Interaction } from '../../Classes/index.js';
+import { moderateUserButton, userEmbed } from '../../features/inspect.js';
 
 export default new Interaction<ButtonInteraction>()
-    .setName('inspect')
-    .setExecute(inspect);
+    .setCustomIdPrefix('inspect')
+    .setRun(inspect);
 
 async function inspect(interaction: ButtonInteraction) {
     // console.log(interaction.customId);

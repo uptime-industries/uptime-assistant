@@ -18,7 +18,7 @@ export async function userEmbed(member:GuildMember, colors: ColorResolvable) {
 
 export function moderateUserButton(user:User) {
     return new ButtonBuilder()
-        .setCustomId(`moderatename_${user.id}`)
+        .setCustomId(`moderatename${user.client.splitCustomIDOn}${user.id}`)
         .setLabel('Moderate Nickname')
         .setStyle(ButtonStyle.Danger);
 }

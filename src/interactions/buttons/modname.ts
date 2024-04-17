@@ -1,15 +1,17 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DiscordAPIError, bold } from 'discord.js';
-import { Interaction } from '../../Client';
+import { Interaction } from '../../Classes/index.js';
 
 export default new Interaction<ButtonInteraction>()
-    .setName('moderatename')
-    .setExecute(async (interaction) => {
-        const args = interaction.customId.split('_');
+    .setCustomIdPrefix('moderatename')
+    .setRun(async (interaction) => {
+        const args = interaction.customId.split(interaction.client.splitCustomIDOn);
         // console.log(args);
         const isY = args[1] == 'y';
         const isN = args[1] == 'n';
         const targetID = isY || isN ? args[2] : args[1];
         const member = await interaction.guild.members.fetch(targetID);
+        const { splitCustomIDOn } = interaction.client
+
         // console.log(interaction.customId);
         if (!member) {
             interaction.reply({
@@ -46,11 +48,11 @@ export default new Interaction<ButtonInteraction>()
                 content:bold(`Are you sure you would like to moderate the nickname of ${member}`),
                 components: [new ActionRowBuilder<ButtonBuilder>()
                     .addComponents(new ButtonBuilder()
-                        .setCustomId(interaction.customId.replace('_', '_y_'))
+                        .setCustomId(interaction.customId.replace(splitCustomIDOn, splitCustomIDOn + 'y' + splitCustomIDOn))
                         .setLabel('Yes')
                         .setStyle(ButtonStyle.Success),
                     new ButtonBuilder()
-                        .setCustomId(interaction.customId.replace('_', '_n_'))
+                        .setCustomId(interaction.customId.replace(splitCustomIDOn, splitCustomIDOn + 'n' + splitCustomIDOn))
                         .setLabel('No')
                         .setStyle(ButtonStyle.Danger))],
                 ephemeral:true,

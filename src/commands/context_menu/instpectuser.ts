@@ -1,6 +1,6 @@
 import { ApplicationCommandType, Colors, GuildMember, PermissionFlagsBits, UserContextMenuCommandInteraction } from 'discord.js';
-import { ContextMenuCommand } from '../../Client';
-import { userEmbed } from '../../features/inspect';
+import { ContextMenuCommand } from '../../Classes/index.js';
+import { userEmbed } from '../../features/inspect.js';
 
 export default new ContextMenuCommand()
     .setBuilder((builder) => builder

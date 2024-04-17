@@ -1,50 +1,73 @@
-import { config } from 'dotenv';
-import { join } from 'path';
-
 import {
-    GatewayIntentBits as Intents, Locale, Partials,
+    GatewayIntentBits as Intents,
+    Partials
 } from 'discord.js';
-import { Client } from './Client';
-import { init } from './i18n';
-import rss from './rss';
-
-// Load .env file contents
-config();
-
-// i18n Initialization
-init(join(__dirname, '../locales'), { fallback: Locale.EnglishUS, hasGlobal: true });
-
+import { Client } from './Classes/index.js';
+import * as commands from './commands/index.js';
+import * as events from './events/index.js';
+import {
+    buttons, modals, selectMenus
+} from './interactions/index.js';
 
 // Initialization (specify intents and partials)
 const client = new Client({
-    intents: [Intents.Guilds, Intents.GuildMessages, Intents.GuildVoiceStates, Intents.MessageContent, Intents.GuildMembers, Intents.GuildModeration],
-    partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.GuildMember],
+    intents: [
+        Intents.Guilds,
+        Intents.GuildMessages,
+        Intents.MessageContent,
+        Intents.GuildMembers
+    ],
+    partials: [
+        Partials.Message,
+        Partials.Channel,
+        Partials.Reaction,
+        Partials.GuildMember
+    ],
     receiveMessageComponents: true,
     receiveModals: true,
     receiveAutocomplete: true,
     replyOnError: true,
-    splitCustomID: true,
+    // replyMessageOnError: 'message on comand error',
     splitCustomIDOn: '_',
-    useGuildCommands: false,
+    useDefaultInterctionEvent: true
 });
 
-(async function start() {
-    await client.init({
-        eventPath: join(__dirname, 'events'),
-        commandPath: join(__dirname, 'commands', 'chat', 'builders'),
-        contextMenuPath: join(__dirname, 'commands', 'context_menu'),
-        buttonPath: join(__dirname, 'interactions', 'buttons'),
-        selectMenuPath: join(__dirname, 'interactions', 'select_menus'),
-        modalPath: join(__dirname, 'interactions', 'modals'),
+// Load Events
+for (const event of Object.values(events)) {
+    client.events.add(event);
+}
+
+// Load commands 
+for (const command of Object.values(commands)) {
+    client.commands.add(command);
+}
+
+// Load buttons
+for (const button of Object.values(buttons)) {
+    client.interactions.addButton(button);
+}
+
+// Load modals
+for (const modal of Object.values(modals)) {
+    client.interactions.addModal(modal);
+}
+
+// Load selectMenus
+// for (const selectMenu of Object.values(selectMenus)) {
+//     client.interactions.addSelectMenu(selectMenu);
+// }
+
+// Bot logins to Discord services
+client.login(process.env.TOKEN)
+    .then(() => {
+        
+        // Skip if no-deployment flag is set, else deploys command
+        if (!process.argv.includes('--no-deployment')) {
+            // removes guild command from set guild
+            // client.commands.deregisterGuildCommands(process.env.GUILDID);
+            // deploys commands
+            client.commands.register();
+        }
     });
 
-    await client.login(process.env.TOKEN);
-
-    // Skip if no-deployment flag is set, else deploys commands
-    if (!process.argv.includes('--no-deployment')) {
-        await client.deploy(process.env.GUILDID);
-    }
-})();
-
-// Rpi locator RSS
-setInterval(() => {rss(client);}, 60 * 1000);
+    
