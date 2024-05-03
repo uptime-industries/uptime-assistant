@@ -1,85 +1,117 @@
-import { ActionRowBuilder, bold, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, GuildMember, Message, MessageCreateOptions, ModalSubmitInteraction, Snowflake, TextChannel, ThreadChannel } from 'discord.js';
-import { Interaction } from '../../Classes/index.js';
+import {
+    ActionRowBuilder,
+    AnyThreadChannel,
+    ButtonBuilder,
+    ButtonStyle,
+    Colors, EmbedBuilder,
+    GuildMember,
+    Message,
+    ModalSubmitInteraction, Snowflake,
+    TimestampStyles
+} from 'discord.js';
+import { Client, Interaction } from '../../Classes/index.js';
 
 const reportChannelID = process.env.REPORT_CHANNEL_ID;
+const defaultComment = 'No Additional Comment';
 
 export default new Interaction<ModalSubmitInteraction>()
     .setCustomIdPrefix('report')
     .setRun(execute);
 
 
-async function execute(interaction:ModalSubmitInteraction) {
+/**
+ *
+ * @param interaction
+ */
+async function execute(interaction: ModalSubmitInteraction) {
     
     interaction.reply({ content: 'Your report has been recived and will be reviewed', ephemeral: true });
-    const { splitCustomIDOn } = interaction.client
-    const channel = interaction.guild.channels.cache.find((_c, k) => k == reportChannelID) as ThreadChannel;
-    const args = interaction.customId.split(splitCustomIDOn);
-    let message:MessageCreateOptions = { content: bold('Error') };
-    switch (args[1]) {
-    case 'm':
-        message = await MessageReport(interaction, args);
-        break;
-    case 'u':
-        message = userReport(interaction, args);
-        break;
-    default:
-        break;
+   
+    const {
+        client, guild, fields, member
+    } = interaction;
+    const { splitCustomIDOn } = client;
+    if (!interaction.inGuild() || guild == null || !(member instanceof GuildMember)) return;
+
+    const reportChannel = guild.channels.cache.find<AnyThreadChannel>((c, k): c is AnyThreadChannel => k == reportChannelID && c.isThread());
+    const args = splitCustomIDOn == undefined ? [interaction.customId] : interaction.customId.split(splitCustomIDOn);
+    let comment: string | undefined = fields.getTextInputValue('comment');
+    if (comment.length == 0) comment = undefined;
+
+    const embeds: EmbedBuilder[] = [];
+
+    if ( args[1] === 'm') {
+        const channel = await guild.channels.fetch(args[2]);
+        if (!channel?.isTextBased()) return;
+        const message = await channel.messages.fetch(args[3]);
+        embeds.push(messageReportEmbed(member, message, comment ));
     }
-    channel.send(message).catch((e) => console.error(e));
+    else if (args[1] == 'u'){
+        const target = await guild.members.fetch(args[2]);
+        embeds.push(userReportEmbed(member, target, comment));
+    }
+    reportChannel?.send({ embeds: embeds, components: [reportRow(args[2], client)] }).catch((e) => console.error(e));
 }
 
 
-function userReport(interaction:ModalSubmitInteraction, args: string[]):MessageCreateOptions {
-    const member = interaction.guild.members.cache.find((_m, k) => k == args[2]);
-    const comment = interaction.fields.getTextInputValue('comment') || 'No Additional Comment';
-    if (!(member instanceof GuildMember)) {
-        console.error('[Error] Member not found during report');
-        return { content: 'Error Contact Maintainer' };
-    }
-    const embed = new EmbedBuilder()
+/**
+ *
+ * @param reporter
+ * @param target
+ * @param comment
+ */
+function userReportEmbed(reporter: GuildMember, target: GuildMember, comment: string = defaultComment){
+    return new EmbedBuilder()
         .setTitle('User Report')
-        .setThumbnail(member.displayAvatarURL({ forceStatic:true, size: 4096 }))
+        .setThumbnail(target.displayAvatarURL({ forceStatic: true, size: 4096 }))
         .addFields(
-            { name: 'Reported', value: `${member}`, inline: true },
-            { name: 'Reported By', value: `${interaction.member}`, inline: true },
-            { name: 'Comment', value: comment })
+            {
+                name: 'Reported', value: `${target}`, inline: true 
+            }, {
+                name: 'Reported By', value: `${reporter}`, inline: true 
+            }, { name: 'Comment', value: comment })
         .setColor(Colors.Red);
-    return { embeds: [embed], components: [reportRow(args[2])] };
 }
 
-async function MessageReport(interaction:ModalSubmitInteraction, args: string[]):Promise<MessageCreateOptions> {
-    const channel = interaction.guild?.channels.cache.find((_m, k) => k == args[2]) as TextChannel;
-    const message = channel.messages.cache.find((_m, k) => k == args[3]);
-    if (!message) {
-        console.error('[Error] message not found during report');
-        return { content: 'Error Contact Maintainer' };
-    }
-    const member = await interaction.guild?.members.fetch(message?.author.id);
-    const comment = interaction.fields.getTextInputValue('comment') || 'No Additional Comment';
-    const embed = new EmbedBuilder()
+/**
+ *
+ * @param reporter
+ * @param message
+ * @param comment
+ */
+function messageReportEmbed(reporter: GuildMember, message: Message, comment: string = defaultComment) {
+    const target = message.member;
+    return new EmbedBuilder()
         .setTitle('Message Report')
-        .setThumbnail(member?.displayAvatarURL({ forceStatic:true, size: 1024 }) || member?.user.avatarURL({ forceStatic: true, size: 1024 }) || null)
+        .setThumbnail(target!.displayAvatarURL({ forceStatic: true, size: 1024 }))
         .setFields(
-            { name: 'Channel', value: `${channel}`, inline: true },
-            { name: 'Date Posted', value: message.createdAt.toDiscordString('F'), inline: true },
-            { name: 'Content of Message', value: message.content },
-            { name: 'Reported', value: `${member}`, inline: true },
-            { name: 'Reported By', value: `${interaction.member}`, inline: true },
-            { name: 'Comment', value: comment })
+            {
+                name: 'Channel', value: message.channel.toString(), inline: true 
+            }, {
+                name: 'Date Posted', value: message.createdAt.toDiscordString(TimestampStyles.LongDateTime), inline: true 
+            }, { name: 'Content of Message', value: message.content }, {
+                name: 'Reported', value: target!.toString(), inline: true 
+            }, {
+                name: 'Reported By', value: reporter.toString(), inline: true 
+            }, { name: 'Comment', value: comment })
         .setColor(Colors.Red);
-    return { embeds: [embed], components: [reportRow(message.author.id, message)] };
 }
 
-function reportRow(id:Snowflake, message?:Message) {
-    const { splitCustomIDOn } = message.client
+/**
+ *
+ * @param id
+ * @param client
+ * @param message
+ */
+function reportRow(id: Snowflake, client: Client, message?: Message) {
+    const { splitCustomIDOn } = client;
     const row = new ActionRowBuilder<ButtonBuilder>()
         .addComponents(instpct.setCustomId(`inspect${splitCustomIDOn}${id}`));
-    if (message) {
+    if (message) 
         return row.addComponents(link.setURL(message.url));
-    }
-    else {
+    
+    else 
         return row;
-    }
 }
 
 const instpct = new ButtonBuilder()
@@ -90,3 +122,4 @@ const link = new ButtonBuilder()
     .setLabel('Link to Message')
     .setEmoji('🔗')
     .setStyle(ButtonStyle.Link);
+

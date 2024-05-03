@@ -16,7 +16,7 @@ export class ChatInputCommand extends BaseCommand<SlashCommandBuilders, ChatInpu
      */
     protected _autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 
-    get autocomplete() {
+    get autocomplete(): ((interaction: AutocompleteInteraction) => Promise<void>) | undefined{
         return this._autocomplete;
     }
 
@@ -34,12 +34,12 @@ export class ChatInputCommand extends BaseCommand<SlashCommandBuilders, ChatInpu
      * @returns The modified object
      */
     setBuilder(input: SlashCommandBuilder | ((commandBuilder: SlashCommandBuilder) => SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>)): this {
-        if (typeof input === 'function') {
+        if (typeof input === 'function') 
             this._builder = input(new SlashCommandBuilder());
-        }
-        else {
+        
+        else 
             this._builder = input;
-        }
+        
         return this;
     }
 

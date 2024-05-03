@@ -15,7 +15,7 @@ export class Interaction<E extends DiscordInteraction> {
         return this._customIdPefix;
     }
 
-    private  set customIdPrefix(id:string) {
+    private  set customIdPrefix(id: string) {
         this._customIdPefix = id;
     }
 

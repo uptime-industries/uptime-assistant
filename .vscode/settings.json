@@ -1,0 +1,20 @@
+{
+	"files.eol": "\r\n",
+	"files.insertFinalNewline": true,
+	"editor.tabSize": 4,
+	"editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit",
+		"source.organizeImports": "explicit"
+	},
+    "eslint.experimental.useFlatConfig": true,
+	"eslint.workingDirectories": [
+		{
+			"mode": "auto"
+		}
+	],
+	"yaml.schemas": {
+		"https://json.schemastore.org/github-issue-config.json": "/.github/ISSUE_TEMPLATE/config.yml"
+	}
+}

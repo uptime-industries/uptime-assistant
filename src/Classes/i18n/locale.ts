@@ -32,7 +32,7 @@ export class LocaleBundle {
      * @param i18n Host i18n object
      * @param locale The locale of this object
      */
-    constructor(i18n: i18n, locale:Locale) {
+    constructor(i18n: i18n, locale: Locale) {
         this.locale = locale;
         this.i18n = i18n;
         if (this.locale === i18n.fallbacklLocale) this.isFallback = true;
@@ -44,7 +44,7 @@ export class LocaleBundle {
      * @param bundle The bundle you wish to add
      * @returns The LocaleBundle
      */
-    addBundle(name: string, bundle:FluentBundle) {
+    addBundle(name: string, bundle: FluentBundle) {
         this.bundles.set(name, bundle);
         return this;
     }
@@ -54,7 +54,7 @@ export class LocaleBundle {
      * @param bundle The bundle you wish to add
      * @returns The LocaleBundle
      */
-    setCommonBundle(bundle:FluentBundle) {
+    setCommonBundle(bundle: FluentBundle) {
         this.bundles.set(common, bundle);
         return this;
     }
@@ -65,59 +65,43 @@ export class LocaleBundle {
      * @param bundleName The name of the budle where the message should be retreved from
      * @returns Fluent message
      */
-    private getMessageBundle(key:string, bundleName:string): { bundle: FluentBundle, message: Message } {
-        let bundle: FluentBundle | undefined;
-
+    private getMessageBundle(key: string, bundleName: string): { bundle: FluentBundle, message: Message } {
+        let message: { bundle: FluentBundle; message: Message; } | undefined;
         // Checks for the bundle with the provided name
         if (this.has(bundleName)) {
-            bundle = this.get(bundleName);
-            if (bundle.hasMessage(key)) {
-                return {
-                    bundle,
-                    message: bundle.getMessage(key)
-                };
-            }
-            
+            message = this.getMessage(this.get(bundleName), key);
+            if (message !== undefined) return message;
         }
 
         // Checks comman file of this Locale
-        if (this.has(common)) {
-            bundle = this.get(common);
-            if (bundle.hasMessage(key)) {
-                return {
-                    bundle,
-                    message: bundle.getMessage(key)
-                };
-            }
-            
+        else if (this.has(common)) {
+            message = this.getMessage(this.get(common), key);
+            if (message !== undefined) return message;
         }
 
         const fallback = this.i18n.getFallbackLocale();
 
         // Checks if the fallback has a bundle of the fallback locale
-        if (fallback.has(bundleName)) {
-            bundle = fallback.get(bundleName);
-            if (bundle.hasMessage(key)) {
-                return {
-                    bundle,
-                    message: bundle.getMessage(key)
-                };
+        if (fallback !== undefined) 
+            if (fallback.has(bundleName)) {
+                message = this.getMessage(fallback.get(bundleName), key);
+                if (message !== undefined) return message;
             }
-            
-        }
 
-        // Checks fallback common file
-        if (fallback.has(common)) {
-            bundle = fallback.get(common);
-            if (bundle.hasMessage(key)) {
-                return {
-                    bundle,
-                    message: bundle.getMessage(key)
-                };
+            // Checks fallback common file
+            else if (fallback.has(common)) {
+                message = this.getMessage(fallback.get(common), key);
+                if (message !== undefined) return message;
             }
-            
-        }
         throw Error(`${key} not found in common in fallback locale`);
+    }
+    
+    private getMessage(bundle: FluentBundle | undefined, key: string) {
+        if (bundle !== undefined && bundle.hasMessage(key)){
+            const message = bundle.getMessage(key);
+            if (message)
+                return { bundle, message }; 
+        }
     }
 
     /**
@@ -125,7 +109,7 @@ export class LocaleBundle {
      * @param bundleName Name of the bundle to check
      * @returns `true` or `false`
      */
-    has(bundleName:string) {
+    has(bundleName: string) {
         return this.bundles.has(bundleName);
     }
 
@@ -134,7 +118,7 @@ export class LocaleBundle {
      * @param bundleName Name of the bundle to get
      * @returns FluentBundle
      */
-    get(bundleName:string) {
+    get(bundleName: string) {
         return this.bundles.get(bundleName);
     }
 
@@ -145,7 +129,7 @@ export class LocaleBundle {
      * @param options veriables to be resoved
      * @returns the resolved message as a string
      */
-    t(key:string, bundleName:string, options?: fluentVariables) {
+    t(key: string, bundleName: string, options?: fluentVariables) {
 
         // finds the message and retuens it with the budle where it was found
         const { bundle, message } = this.getMessageBundle(key, bundleName);
@@ -153,12 +137,13 @@ export class LocaleBundle {
         const errors: Error[] = [];
 
         // appliy formating
+        if (message.value == null) throw new Error('Message value error');
         const res = bundle.formatPattern(message.value, options, errors);
 
         // Returns if any errors occured
-        if (errors.length) {
+        if (errors.length) 
             throw Error(`i18n - Errors with ${key}`, { cause: errors });
-        }
+        
         
         return res;
     }

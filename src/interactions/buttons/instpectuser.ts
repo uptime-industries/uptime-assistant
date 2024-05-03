@@ -1,4 +1,6 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonInteraction } from 'discord.js';
+import {
+    ActionRowBuilder, ButtonBuilder, ButtonInteraction
+} from 'discord.js';
 import { Interaction } from '../../Classes/index.js';
 import { moderateUserButton, userEmbed } from '../../features/inspect.js';
 
@@ -6,21 +8,29 @@ export default new Interaction<ButtonInteraction>()
     .setCustomIdPrefix('inspect')
     .setRun(inspect);
 
+/**
+ *
+ * @param interaction
+ */
 async function inspect(interaction: ButtonInteraction) {
     // console.log(interaction.customId);
-    const member = await interaction.guild.members.fetch(interaction.customId.split(interaction.client.splitCustomIDOn)[1]);
-    if (!member) {
+    const {
+        guild, customId, client 
+    } = interaction;
+    const { splitCustomIDOn } = client;
+    const member = await guild?.members.fetch(customId.split(splitCustomIDOn!)[1]);
+    if (!member) 
         interaction.reply({
             content: 'User is no longer in the server',
-            ephemeral: true,
+            ephemeral: true
         });
-    }
-    else {
+    
+    else 
         interaction.reply({
             embeds: [await userEmbed(member, '#2b2d31')],
             components: [new ActionRowBuilder<ButtonBuilder>().addComponents(moderateUserButton(member.user))],
-            ephemeral: true,
+            ephemeral: true
         });
-    }
+    
 
 }

@@ -4,7 +4,7 @@ import {
 } from 'discord.js';
 import { BaseCommand } from './BaseCommand.js';
 
-export class ContextMenuCommand extends BaseCommand<ContextMenuCommandBuilder, ContextMenuCommandInteraction> {
+export class ContextMenuCommand<Type extends ContextMenuCommandInteraction> extends BaseCommand<ContextMenuCommandBuilder, Type> {
     /**
      * Set the Context Menu command builder method
      * @param input Context Menu command builder or callback
@@ -13,12 +13,10 @@ export class ContextMenuCommand extends BaseCommand<ContextMenuCommandBuilder, C
     public setBuilder(
         input: ContextMenuCommandBuilder | ((subcommandBuilder: ContextMenuCommandBuilder) => ContextMenuCommandBuilder)
     ): this {
-        if (typeof input === 'function') {
+        if (typeof input === 'function') 
             this._builder = input(new ContextMenuCommandBuilder());
-        }
-        else {
+        else 
             this._builder = input;
-        }
         return this;
     }
 

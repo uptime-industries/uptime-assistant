@@ -1,15 +1,19 @@
 import {
     ApplicationCommandType,
-    AutocompleteInteraction, ChatInputCommandInteraction, Collection, ContextMenuCommandInteraction,
+    AutocompleteInteraction, ChatInputCommandInteraction, Collection,
+    MessageContextMenuCommandInteraction,
     REST,
     RESTPostAPIChatInputApplicationCommandsJSONBody,
     RESTPostAPIContextMenuApplicationCommandsJSONBody,
     Routes,
-    Snowflake
+    Snowflake,
+    UserContextMenuCommandInteraction
 } from 'discord.js';
 import assert from 'node:assert/strict';
 import { Client } from '../Client/index.js';
-import { ChatInputCommand, ContextMenuCommand } from '../Commands/index.js';
+import {
+    ChatInputCommand, Commands, ContextMenuCommand
+} from '../Commands/index.js';
 
 
 export class CommandHandler {
@@ -19,9 +23,9 @@ export class CommandHandler {
 
     protected _chatCommands = new Collection<string, ChatInputCommand>();
 
-    protected _userContextMenus = new Collection<string, ContextMenuCommand>();
+    protected _userContextMenus = new Collection<string, ContextMenuCommand<UserContextMenuCommandInteraction>>();
 
-    protected _messageContextMenus = new Collection<string, ContextMenuCommand>();
+    protected _messageContextMenus = new Collection<string, ContextMenuCommand<MessageContextMenuCommandInteraction>>();
 
     get userContexMenus() {
         return this._userContextMenus;
@@ -31,13 +35,14 @@ export class CommandHandler {
         return this._chatCommands;
     }
 
-    private validateAplicationCommand(AplicationCommand:ContextMenuCommand | ChatInputCommand, type: ApplicationCommandType) {
+    private validateAplicationCommand(AplicationCommand: Commands, type: ApplicationCommandType) {
         assert(typeof AplicationCommand.execute !== 'undefined', 'excute function not present');
         assert(typeof AplicationCommand.builder !== 'undefined', 'builder is not present');
         if (AplicationCommand.type !== type) new Error('Command Type does not match Exspected');
     }
 
-    add(command: ChatInputCommand | ContextMenuCommand) {
+    add(command: ChatInputCommand | ContextMenuCommand<UserContextMenuCommandInteraction> |
+        ContextMenuCommand<MessageContextMenuCommandInteraction>) {
         const { type } = command;
 
         this.validateAplicationCommand(command, type);
@@ -47,10 +52,10 @@ export class CommandHandler {
                 this._chatCommands.set(command.builder.name, command);
                 break;
             case ApplicationCommandType.Message:
-                this._messageContextMenus.set(command.builder.name, command as ContextMenuCommand);
+                this._messageContextMenus.set(command.builder.name, command as ContextMenuCommand<MessageContextMenuCommandInteraction>);
                 break;
             case ApplicationCommandType.User:
-                this._userContextMenus.set(command.builder.name, command as ContextMenuCommand);
+                this._userContextMenus.set(command.builder.name, command as ContextMenuCommand<UserContextMenuCommandInteraction>);
                 break;
             default:
                 break;
@@ -59,7 +64,7 @@ export class CommandHandler {
     }
 
     addChatCommands(commands: Collection<string, ChatInputCommand>) {
-        for (const [ name, command ] of commands) {
+        for (const [ name, command ] of commands) 
             try {
                 this.validateAplicationCommand(command, ApplicationCommandType.ChatInput);
                 this._chatCommands.set(name, command);
@@ -67,12 +72,12 @@ export class CommandHandler {
             catch (error) {
                 console.error(`Command "${name}" had an error: ${error}`);
             }
-        }
+        
         return this;
     }
 
-    addUserContextMenus(commands: Collection<string, ContextMenuCommand>) {
-        for (const [ name, command ] of commands) {
+    addUserContextMenus(commands: Collection<string, ContextMenuCommand<UserContextMenuCommandInteraction>>) {
+        for (const [ name, command ] of commands) 
             try {
                 this.validateAplicationCommand(command, ApplicationCommandType.User);
                 this._userContextMenus.set(name, command);
@@ -80,12 +85,12 @@ export class CommandHandler {
             catch (error) {
                 console.error(`Command "${name}" had an error: ${error}`);
             }
-        }
+        
         return this;
     }
 
-    addMessageContextMenus(commands: Collection<string, ContextMenuCommand>) {
-        for (const [ name, command ] of commands) {
+    addMessageContextMenus(commands: Collection<string, ContextMenuCommand<MessageContextMenuCommandInteraction>>) {
+        for (const [ name, command ] of commands) 
             try {
                 this.validateAplicationCommand(command, ApplicationCommandType.User);
                 this._messageContextMenus.set(name, command);
@@ -93,7 +98,7 @@ export class CommandHandler {
             catch (error) {
                 console.error(`Command "${name}" had an error: ${error}`);
             }
-        }
+        
         return this;
     }
 
@@ -118,12 +123,12 @@ export class CommandHandler {
         this.chatCommands.filter((f) => f.isGlobal === false).map((m) => {
             const json = m.toJSON();
             m.guildIds.forEach((guildId) => {
-                if (guildCommandData.has(guildId)) {
-                    guildCommandData.get(guildId).concat(json);
-                }
-                else {
+                if (guildCommandData.has(guildId)) 
+                    guildCommandData.get(guildId)!.concat(json);
+                
+                else 
                     guildCommandData.set(guildId, [json]);
-                }
+                
             });
 
         });
@@ -131,30 +136,30 @@ export class CommandHandler {
         this._userContextMenus.filter((f) => f.isGlobal === false).map((m) => {
             const json = m.toJSON();
             m.guildIds.forEach((guildId) => {
-                if (guildCommandData.has(guildId)) {
-                    guildCommandData.get(guildId).concat(json);
-                }
-                else {
+                if (guildCommandData.has(guildId)) 
+                    guildCommandData.get(guildId)!.concat(json);
+                
+                else 
                     guildCommandData.set(guildId, [json]);
-                }
+                
             });
         });
 
         this._messageContextMenus.filter((f) => f.isGlobal === false).map((m) => {
             const json = m.toJSON();
             m.guildIds.forEach((guildId) => {
-                if (guildCommandData.has(guildId)) {
-                    guildCommandData.get(guildId).concat(json);
-                }
-                else {
+                if (guildCommandData.has(guildId)) 
+                    guildCommandData.get(guildId)!.concat(json);
+                
+                else 
                     guildCommandData.set(guildId, [json]);
-                }
+                
             });
         });
         // Deploys commands buy guild
-        for (const [ guildIds, json ] of guildCommandData) {
+        for (const [ guildIds, json ] of guildCommandData) 
             await this.client.application.commands.set(json, guildIds);
-        }
+        
         console.log(`Deployed commands to ${guildCommandData.size} guilds`);
         console.log('Commands registered');
     }
@@ -164,16 +169,16 @@ export class CommandHandler {
      */
     async deregisterGuildCommands(guildId?: string) {
         try {
-            if (guildId) {
+            if (guildId) 
                 await this.rest.put(Routes.applicationGuildCommands(this.client.user.id, guildId), { body: [] })
                     .then(() => console.log(`Successfully deleted all guild commands in ${guildId}.`))
                     .catch(console.error);
-            }
+            
             else {
-                for ([guildId] of await (this.client.guilds.fetch())) {
+                for ([guildId] of await (this.client.guilds.fetch())) 
                     await this.rest.put(Routes.applicationGuildCommands(this.client.user.id, guildId), { body: [] })
                         .catch(console.error);
-                }
+                
                 console.log(`Successfully deleted all guild commands.`);
             }
         }
@@ -184,19 +189,21 @@ export class CommandHandler {
     }
 
     runChatCommand(interaction: ChatInputCommandInteraction) {
-        return this.chatCommands.get(interaction.commandName).execute(interaction);
+        return this.chatCommands.get(interaction.commandName)?.execute(interaction);
     }
 
     runAutocomplete(interaction: AutocompleteInteraction) {
-        return this.chatCommands.get(interaction.commandName).autocomplete(interaction);
+        const command = this.chatCommands.get(interaction.commandName);
+        if (command?.autocomplete !== undefined ) 
+            return command?.autocomplete(interaction);
     }
 
-    runUserContextMenus(interaction: ContextMenuCommandInteraction) {
-        return this._userContextMenus.get(interaction.commandName).execute(interaction);
+    runUserContextMenus(interaction: UserContextMenuCommandInteraction) {
+        return this._userContextMenus.get(interaction.commandName)?.execute(interaction);
     }
 
-    runMessageContextMenus(interaction: ContextMenuCommandInteraction) {
-        return this._messageContextMenus.get(interaction.commandName).execute(interaction);
+    runMessageContextMenus(interaction: MessageContextMenuCommandInteraction) {
+        return this._messageContextMenus.get(interaction.commandName)?.execute(interaction);
     }
     constructor(client: Client) {
         this.client = client;

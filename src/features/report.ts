@@ -1,4 +1,6 @@
-import { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } from 'discord.js';
+import {
+    ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle
+} from 'discord.js';
 
 export const reportModal = new ModalBuilder()
     .setTitle('Report')
@@ -11,5 +13,5 @@ export const reportModal = new ModalBuilder()
                     .setPlaceholder('Advertising, Repetitive messages, Off-topic messages, etc.')
                     .setMaxLength(1000)
                     .setRequired(false)
-                    .setStyle(TextInputStyle.Paragraph)),
+                    .setStyle(TextInputStyle.Paragraph))
     );

@@ -80,12 +80,12 @@ export class ExtendedClient extends Client<true> {
 
         // Misc configuration
 
-        if (useDefaultInterctionEvent) {
+        if (useDefaultInterctionEvent) 
             this.events.add(onInteractionCreate);
-        }
-        else {
+        
+        else 
             this.useDefaultInterctionEvent = false;
-        }
+        
         this.receiveMessageComponents = receiveMessageComponents === undefined ? false : receiveMessageComponents;
         this.receiveModals = receiveModals === undefined ? false : receiveModals;
         this.receiveAutocomplete = receiveAutocomplete === undefined ? false : receiveAutocomplete;
@@ -100,9 +100,9 @@ export class ExtendedClient extends Client<true> {
      * @returns string response
      */
     public async login(token?: string) {
-        if (!token) {
+        if (!token) 
             throw new Error('[ERROR] Missing token');
-        }
+        
         this._hasInitRun = true;
         return super.login(token);
     }

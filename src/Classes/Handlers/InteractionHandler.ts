@@ -20,7 +20,7 @@ export class InteractionHandler {
         return this._buttons;
     }
 
-    private set buttons(buttons:Collection<string, Interaction<ButtonInteraction>>) {
+    private set buttons(buttons: Collection<string, Interaction<ButtonInteraction>>) {
         this._buttons = buttons;
     }
 
@@ -28,7 +28,7 @@ export class InteractionHandler {
         return this._selectMenus;
     }
 
-    private set selectMenus(buttons:Collection<string, Interaction<AnySelectMenuInteraction>>) {
+    private set selectMenus(buttons: Collection<string, Interaction<AnySelectMenuInteraction>>) {
         this._selectMenus = buttons;
     }
 
@@ -36,7 +36,7 @@ export class InteractionHandler {
         return this._modals;
     }
 
-    private set modals(buttons:Collection<string, Interaction<ModalSubmitInteraction>>) {
+    private set modals(buttons: Collection<string, Interaction<ModalSubmitInteraction>>) {
         this._modals = buttons;
     }
 
@@ -52,7 +52,7 @@ export class InteractionHandler {
 
     runButton(interaction: ButtonInteraction) {
         const interactionName = this.client.splitCustomIDOn ? interaction.customId.split(this.client.splitCustomIDOn)[0] : interaction.customId;
-        return this.buttons.get(interactionName).execute(interaction);
+        return this.buttons.get(interactionName)?.run(interaction);
     }
 
     addModal(interaction: Interaction<ModalSubmitInteraction>) {
@@ -67,7 +67,7 @@ export class InteractionHandler {
 
     runModal(interaction: ModalSubmitInteraction) {
         const interactionName = this.client.splitCustomIDOn ? interaction.customId.split(this.client.splitCustomIDOn)[0] : interaction.customId;
-        return this._modals.get(interactionName).execute(interaction);
+        return this._modals.get(interactionName)?.run(interaction);
     }
 
     addSelectMenu(interaction: Interaction<AnySelectMenuInteraction>) {
@@ -82,7 +82,7 @@ export class InteractionHandler {
 
     runSelectMenus(interaction: AnySelectMenuInteraction) {
         const interactionName = this.client.splitCustomIDOn ? interaction.customId.split(this.client.splitCustomIDOn)[0] : interaction.customId;
-        return this._selectMenus.get(interactionName).execute(interaction);
+        return this._selectMenus.get(interactionName)?.run(interaction);
     }
 
     constructor(client: Client) {
