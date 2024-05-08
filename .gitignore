@@ -46,3 +46,6 @@ dist/
 
 # MacOS
 .DS_Store
+
+# Configuation
+configs.json
