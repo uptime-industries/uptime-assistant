@@ -3,11 +3,11 @@ WORKDIR /usr/bot
 
 COPY *.json .
 
-RUN yarn install --frozen-lockfile
+RUN npm ci
 
 COPY . .
 
-RUN yarn build
+RUN npm build
 
 FROM node:lts-iron AS runner
 WORKDIR /usr/bot
@@ -15,11 +15,11 @@ WORKDIR /usr/bot
 COPY *.json .
 COPY ./locales ./locales
 
-RUN yarn install --frozen-lockfile --production
+RUN npm install --omit=dev
 
 COPY --from=builder /usr/bot/dist/ ./dist
 COPY ./src/*.json ./dist
 
 USER node
 
-CMD [ "node", "dist/bot.js" ]
+CMD [ "npm", "run", "start" ]

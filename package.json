@@ -5,7 +5,8 @@
   "main": "./dist/bot.js",
   "type": "module",
   "scripts": {
-    "prestart": "npm run build",
+    "predev": "npm run build",
+    "dev": "npm run start",
     "start": "node --env-file=.env ./dist/bot.js",
     "prebuild": "rimraf ./dist",
     "build": "tsc"
