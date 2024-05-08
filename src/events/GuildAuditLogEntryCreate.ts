@@ -20,10 +20,8 @@ async function execute(auditLogEntry: GuildAuditLogsEntry, guild: Guild) {
     // const executor = auditLogEntry.executor;
     const target = auditLogEntry.target;
     const change = auditLogEntry.changes;
-    // console.log(auditLogEntry);
     if (auditLogEntry.action == AuditLogEvent.MemberBanAdd && (target instanceof User)) {
         const avatarURL = target.avatarURL({ forceStatic: true });
-        console.log(auditLogEntry);
         LeaveChannel.send({
             embeds: [
                 new EmbedBuilder()
@@ -73,7 +71,6 @@ async function execute(auditLogEntry: GuildAuditLogsEntry, guild: Guild) {
         const title = 'Member Timed Out';
         const color = Colors.LuminousVividPink;
         const reason = auditLogEntry.reason || 'No Reason Given';
-        // console.log(auditLogEntry, newDate, oldDate);
         timeoutChannel.send({
             embeds: [
                 new EmbedBuilder()

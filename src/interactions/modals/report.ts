@@ -4,6 +4,7 @@ import {
     ButtonBuilder,
     ButtonStyle,
     Colors, EmbedBuilder,
+    Events,
     GuildMember,
     Message,
     ModalSubmitInteraction, Snowflake,
@@ -50,7 +51,7 @@ async function execute(interaction: ModalSubmitInteraction) {
         const target = await guild.members.fetch(args[2]);
         embeds.push(userReportEmbed(member, target, comment));
     }
-    reportChannel?.send({ embeds: embeds, components: [reportRow(args[2], client)] }).catch((e) => console.error(e));
+    reportChannel?.send({ embeds: embeds, components: [reportRow(args[2], client)] }).catch((e) => client.emit(Events.Error, e));
 }
 
 

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "prestart": "npm run build",
-    "start": "node ./dist/bot.js",
+    "start": "node --env-file=.env ./dist/bot.js",
     "prebuild": "rimraf ./dist",
     "build": "tsc"
   },
@@ -20,9 +20,12 @@
     "url": "https://github.com/Uptime-Lab/Uptime-Bot/issues"
   },
   "homepage": "https://github.com/Uptime-Lab/Uptime-Bot#readme",
+  "engines": {
+    "node": ">=20.12.2"
+  },
   "dependencies": {
     "@fluent/bundle": "^0.18.0",
-    "discord.js": "^14.12.1"
+    "discord.js": "^14.15.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.2",
@@ -35,6 +38,9 @@
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsdoc": "^48.2.3",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.9.3",
     "typescript": "^5.4.5"
   }
 }

@@ -3,14 +3,21 @@ import {
     DiscordAPIError, Events, Interaction,
     InteractionType
 } from 'discord.js';
-import { Event } from '../Event.js';
+import { Event } from '../Classes/index.js';
+import { serverConfigs } from '../bot.js';
 
 /**
  * Handles the creation of a new interaction.
  * @param interaction - The interaction object.
  */
 async function onInteractionCreate(interaction: Interaction) {
-    const { client, type } = interaction;
+    const {
+        client, type, guildId 
+    } = interaction;
+
+    if(interaction.inGuild() && !serverConfigs.cache.has(interaction.guildId))
+        serverConfigs.create(interaction.guild!);
+
     const {
         commands, interactions, errorMessage, replyOnError
     } = client;
@@ -53,9 +60,7 @@ async function onInteractionCreate(interaction: Interaction) {
                 else if (interaction.isAnySelectMenu()) 
                     // If the interaction is a select menu interaction, execute the corresponding select menu handler
                     await interactions.runSelectMenus(interaction);
-                
                 break;
-
             default:
                 break;
         }

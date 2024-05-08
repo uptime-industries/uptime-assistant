@@ -19,7 +19,7 @@ export default [
     jsdoc.configs['flat/recommended-typescript'],
     {
         files: [ '**/*.ts', '**/*.js' ],
-        ignores: ['**/dist/**/*, node_,odules/**/*'],
+        ignores: ['./dist/**/*, node_modules/**/*'],
         languageOptions: {
             parser: tsParser,
             parserOptions: { ecmaVersion: 'latest' }
@@ -171,7 +171,7 @@ export default [
             'max-classes-per-file': 'off',
             'no-await-in-loop': 'off',
             'no-bitwise': 'off',
-            'no-console': 'off',
+            'no-console': 'error',
             'no-continue': 'off',
             'no-tabs': 'off',
             'no-param-reassign': 0,

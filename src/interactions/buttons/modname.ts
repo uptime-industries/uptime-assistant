@@ -1,5 +1,5 @@
 import {
-    ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DiscordAPIError, bold
+    ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, DiscordAPIError, Events, bold
 } from 'discord.js';
 import { Interaction } from '../../Classes/index.js';
 
@@ -12,14 +12,12 @@ export default new Interaction<ButtonInteraction>()
         const { splitCustomIDOn } = client;
         if ( splitCustomIDOn == undefined) return;
         const args = customId.split(splitCustomIDOn);
-        // console.log(args);
         const isY = args[1] == 'y';
         const isN = args[1] == 'n';
         const targetID = isY || isN ? args[2] : args[1];
         const member = await guild?.members.fetch(targetID);
         
 
-        // console.log(interaction.customId);
         if (!member) 
             interaction.reply({
                 content: 'User is no longer in the server',
@@ -34,7 +32,7 @@ export default new Interaction<ButtonInteraction>()
                 }))
                 .catch((err) => {
                     if (!(err instanceof DiscordAPIError)) {
-                        console.error(err);
+                        client.emit(Events.Error, err);
                         return;
                     }
                     else if (err.code == 50013) 

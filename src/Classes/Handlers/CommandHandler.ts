@@ -1,6 +1,8 @@
 import {
     ApplicationCommandType,
     AutocompleteInteraction, ChatInputCommandInteraction, Collection,
+    DiscordjsError,
+    Events,
     MessageContextMenuCommandInteraction,
     REST,
     RESTPostAPIChatInputApplicationCommandsJSONBody,
@@ -70,7 +72,9 @@ export class CommandHandler {
                 this._chatCommands.set(name, command);
             }
             catch (error) {
-                console.error(`Command "${name}" had an error: ${error}`);
+                if (error instanceof Error || error instanceof DiscordjsError)
+                    this.client.emit(Events.Error, error);
+                else throw error;
             }
         
         return this;
@@ -83,7 +87,9 @@ export class CommandHandler {
                 this._userContextMenus.set(name, command);
             }
             catch (error) {
-                console.error(`Command "${name}" had an error: ${error}`);
+                if (error instanceof Error || error instanceof DiscordjsError)
+                    this.client.emit(Events.Error, error);
+                else throw error;
             }
         
         return this;
@@ -96,7 +102,9 @@ export class CommandHandler {
                 this._messageContextMenus.set(name, command);
             }
             catch (error) {
-                console.error(`Command "${name}" had an error: ${error}`);
+                if (error instanceof Error || error instanceof DiscordjsError)
+                    this.client.emit(Events.Error, error);
+                else throw error;
             }
         
         return this;
@@ -109,12 +117,12 @@ export class CommandHandler {
     async register() {
         if (!this.client.loggedIn) throw Error('Client cannot register commands before init');
 
-        console.log('Deploying commands...');
+        this.client.emit(Events.Debug, 'Deploying commands...');
         const globalCommandData = this.chatCommands.filter((f) => f.isGlobal === true).map((m) => m.toJSON())
             .concat(this._userContextMenus.filter((f) => f.isGlobal === true).map((m) => m.toJSON()))
             .concat(this._messageContextMenus.filter((f) => f.isGlobal === true).map((m) => m.toJSON()));
         const sentCommands = await this.client.application.commands.set(globalCommandData);
-        console.log(`Deployed ${sentCommands.size} global command(s)`);
+        this.client.emit(Events.Debug, `Deployed ${sentCommands.size} global command(s)`);
         const guildCommandData = new Collection<
             Snowflake,
             (RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody)[]
@@ -159,9 +167,7 @@ export class CommandHandler {
         // Deploys commands buy guild
         for (const [ guildIds, json ] of guildCommandData) 
             await this.client.application.commands.set(json, guildIds);
-        
-        console.log(`Deployed commands to ${guildCommandData.size} guilds`);
-        console.log('Commands registered');
+        this.client.emit(Events.Debug, `Deployed commands to ${guildCommandData.size} guilds\nCommands registered`);
     }
     /**
      * Deregiser commands for one or more guilds
@@ -171,19 +177,20 @@ export class CommandHandler {
         try {
             if (guildId) 
                 await this.rest.put(Routes.applicationGuildCommands(this.client.user.id, guildId), { body: [] })
-                    .then(() => console.log(`Successfully deleted all guild commands in ${guildId}.`))
-                    .catch(console.error);
+                    .then(() => this.client.emit(Events.Debug, `Successfully deleted all guild commands in ${guildId}.`))
+                    .catch((e) => this.client.emit(Events.Error, e));
             
             else {
                 for ([guildId] of await (this.client.guilds.fetch())) 
                     await this.rest.put(Routes.applicationGuildCommands(this.client.user.id, guildId), { body: [] })
-                        .catch(console.error);
-                
-                console.log(`Successfully deleted all guild commands.`);
+                        .catch((e) => this.client.emit(Events.Error, e));
+                this.client.emit(Events.Debug, `Successfully deleted all guild commands.`);
             }
         }
         catch (error) {
-            console.error(error);
+            if (error instanceof Error || error instanceof DiscordjsError)
+                this.client.emit(Events.Error, error);
+            else throw error;
         }
         
     }

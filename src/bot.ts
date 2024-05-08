@@ -3,6 +3,7 @@ import {
     Partials
 } from 'discord.js';
 import 'source-map-support/register.js';
+import { ConfigManager } from './Classes/Configs.js';
 import { Client } from './Classes/index.js';
 import * as commands from './commands/index.js';
 import * as events from './events/index.js';
@@ -28,7 +29,7 @@ const client = new Client({
     replyOnError: true,
     // replyMessageOnError: 'message on comand error',
     splitCustomIDOn: '_',
-    useDefaultInterctionEvent: true
+    useDefaultInterctionEvent: false
 });
 
 // Load Events
@@ -69,4 +70,7 @@ client.login(process.env.TOKEN)
         
     });
 
+export const serverConfigs = new ConfigManager(client)
+    .setConfigPath('./configs.json')
+    .loadConfigs();
     
