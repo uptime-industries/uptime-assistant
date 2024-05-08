@@ -65,12 +65,11 @@ function userReportEmbed(reporter: GuildMember, target: GuildMember, comment: st
     return new EmbedBuilder()
         .setTitle('User Report')
         .setThumbnail(target.displayAvatarURL({ forceStatic: true, size: 4096 }))
-        .addFields(
-            {
-                name: 'Reported', value: `${target}`, inline: true 
-            }, {
-                name: 'Reported By', value: `${reporter}`, inline: true 
-            }, { name: 'Comment', value: comment })
+        .addFields({
+            name: 'Reported', value: `${target}`, inline: true 
+        }, {
+            name: 'Reported By', value: `${reporter}`, inline: true 
+        }, { name: 'Comment', value: comment })
         .setColor(Colors.Red);
 }
 
@@ -85,16 +84,15 @@ function messageReportEmbed(reporter: GuildMember, message: Message, comment: st
     return new EmbedBuilder()
         .setTitle('Message Report')
         .setThumbnail(target!.displayAvatarURL({ forceStatic: true, size: 1024 }))
-        .setFields(
-            {
-                name: 'Channel', value: message.channel.toString(), inline: true 
-            }, {
-                name: 'Date Posted', value: message.createdAt.toDiscordString(TimestampStyles.LongDateTime), inline: true 
-            }, { name: 'Content of Message', value: message.content }, {
-                name: 'Reported', value: target!.toString(), inline: true 
-            }, {
-                name: 'Reported By', value: reporter.toString(), inline: true 
-            }, { name: 'Comment', value: comment })
+        .setFields({
+            name: 'Channel', value: message.channel.toString(), inline: true 
+        }, {
+            name: 'Date Posted', value: message.createdAt.toDiscordString(TimestampStyles.LongDateTime), inline: true 
+        }, { name: 'Content of Message', value: message.content }, {
+            name: 'Reported', value: target!.toString(), inline: true 
+        }, {
+            name: 'Reported By', value: reporter.toString(), inline: true 
+        }, { name: 'Comment', value: comment })
         .setColor(Colors.Red);
 }
 

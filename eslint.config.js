@@ -19,7 +19,7 @@ export default [
     jsdoc.configs['flat/recommended-typescript'],
     {
         files: [ '**/*.ts', '**/*.js' ],
-        ignores: ['./dist/**/*, node_modules/**/*'],
+        ignores: ['dist, node_modules'],
         languageOptions: {
             parser: tsParser,
             parserOptions: { ecmaVersion: 'latest' }
@@ -67,8 +67,9 @@ export default [
                 'error',
 			    'stroustrup'
             ],
-            '@stylistic/function-call-argument-newline': [ 'error', 'never' ],
+            '@stylistic/function-call-argument-newline': [ 'error', 'consistent' ],
             '@stylistic/function-call-spacing': [ 'error', 'never' ],
+            '@stylistic/function-paren-newline': [ 'error', 'multiline' ],
             '@stylistic/indent': [
                 'error',
                 4
