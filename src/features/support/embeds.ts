@@ -1,7 +1,7 @@
 import {
-    ColorResolvable, Embed, EmbedBuilder, GuildMember,
-    TimestampStyles
+    ColorResolvable, Embed, EmbedBuilder, GuildMember
 } from 'discord.js';
+import { SupportSettings } from '../../Classes/Config/Config.js';
 
 /**
  * Generates embed for tickets
@@ -32,15 +32,12 @@ export function newTicketEmbed(subject: string, body: string, color: ColorResolv
 }
 
 /**
- *
- * @param data
- * @param embed
- * @param member
- * @returns
+ * Update embed to be closed
+ * @param embed embed used as base for update
+ * @returns embed builder
  */
-export function closedTicketEmbed(embed: Embed, member: GuildMember) {
-    const closedBy = `${member.displayName} at ${ (new Date).toDiscordString(TimestampStyles.ShortDateTime)}`;
-    const newEmbed = new EmbedBuilder(embed.data)
+export function closedTicketEmbed(embed: Embed) {
+    return new EmbedBuilder(embed.data)
         .setFields(
             {
                 name: embed.fields[0].name,
@@ -49,21 +46,19 @@ export function closedTicketEmbed(embed: Embed, member: GuildMember) {
             },
             {
                 name: embed.fields[1].name,
-                value: '\`Closed\`', inline: true 
+                value: '\`Closed\`',
+                inline: true 
             }
         )
         .setTimestamp();
-    return newEmbed;
 }
 
 /**
- *
- * @param embed
- * @param member
- * @returns
+ * Update embed to be open
+ * @param embed embed used as base for update
+ * @returns embed builder
  */
-export function reopenTicketEmbed(embed: Embed, member: GuildMember) {
-    const reopenedBy = `${member.displayName} at ${ (new Date).toDiscordString(TimestampStyles.ShortDateTime)}`;
+export function reopenTicketEmbed(embed: Embed) {
     return new EmbedBuilder(embed.data)
         .setFields(
             {
@@ -78,4 +73,16 @@ export function reopenTicketEmbed(embed: Embed, member: GuildMember) {
             }
         )
         .setTimestamp();
+}
+
+/**
+ * 
+ * @param config
+ * @returns
+ */
+export function sendEmbed(config: SupportSettings) {
+    return new EmbedBuilder()
+        .setTitle(config?.embedTitle)
+        .setDescription(config?.embedDescription)
+        .setColor(config.embedColor != undefined ? config.embedColor : null);
 }

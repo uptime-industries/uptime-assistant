@@ -1,5 +1,7 @@
 import {
-    ActionRowBuilder, ButtonBuilder, ButtonStyle
+    ActionRowBuilder, ButtonBuilder, ButtonStyle,
+    ComponentEmojiResolvable,
+    Message
 } from 'discord.js';
 
 export const closeTicket = new ButtonBuilder()
@@ -29,3 +31,30 @@ export const newTicketActionRow = new ActionRowBuilder<ButtonBuilder>()
 
 export const closedTicketActionRow = new ActionRowBuilder<ButtonBuilder>()
     .setComponents(reopenTicket);
+
+/**
+ *
+ * @param emoji
+ * @returns
+ */
+export function newTicketRow(emoji: ComponentEmojiResolvable) {
+    return new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(new ButtonBuilder()
+            .setCustomId('ticket')
+            .setLabel('Create a Ticket')
+            .setStyle(ButtonStyle.Primary)
+            .setEmoji(emoji));
+}
+
+/**
+ * 
+ * @param message
+ * @returns
+ */
+export function messageLinkRow(message: Message) {
+    return new ActionRowBuilder<ButtonBuilder>()
+        .addComponents(new ButtonBuilder()
+            .setURL(message.url)
+            .setStyle(ButtonStyle.Link)
+            .setLabel('Go to Message'));
+}

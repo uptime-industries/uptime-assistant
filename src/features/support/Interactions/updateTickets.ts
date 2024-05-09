@@ -21,7 +21,7 @@ export const closeTicket = new Interaction<ButtonInteraction>({ customIdPrefix: 
         await interaction.reply({ content: 'This ticket has been closed.' });
 
         await message.edit({
-            embeds: [closedTicketEmbed(message.embeds[0], guildMember)],
+            embeds: [closedTicketEmbed(message.embeds[0])],
             components: [closedTicketActionRow]
         });
         channel.setAutoArchiveDuration(ThreadAutoArchiveDuration.OneDay);
@@ -44,7 +44,7 @@ export const reopenTicket = new Interaction<ButtonInteraction>({ customIdPrefix:
         const config = serverConfigs.cache.get(interaction.guildId!)?.support!;
         await interaction.reply({ content: `${config.role}, This Ticket has be reopened` });
         await message.edit({
-            embeds: [reopenTicketEmbed(message.embeds[0], guildMember)],
+            embeds: [reopenTicketEmbed(message.embeds[0])],
             components: [newTicketActionRow]
         });
 

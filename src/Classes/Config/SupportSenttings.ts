@@ -1,21 +1,14 @@
 import {
-    Collection,
-    ColorResolvable, ComponentEmojiResolvable,
-    DiscordjsError,
-    Events,
+    ColorResolvable,
+    ComponentEmojiResolvable,
     Guild,
-    Role,
-    RoleResolvable,
-    Snowflake,
+    Role, RoleResolvable,
     resolveColor
 } from 'discord.js';
+import { Config } from './Config.js';
+import { supportConfig } from './interfaces.js';
 
-import fs from 'fs';
-import { Client } from './Client/index.js';
-
-
-
-class SupportSettings {
+export class SupportSettings {
 
     private guildConfig: Config;
 
@@ -118,106 +111,5 @@ class SupportSettings {
         if (emoji) this.setButtonEmoji(emoji);
         if (roleId) this.setRole(roleId);
         if (otherRoleId) this.setOtherRole(otherRoleId);
-    }
-}
-
-interface serverConfig {
-    guildId: Snowflake,
-    support: supportConfig
-}
-interface supportConfig {
-    title: string,
-    description: string,
-    color?: ColorResolvable,
-    emoji: ComponentEmojiResolvable,
-    roleId?: Snowflake,
-    otherRoleId?: Snowflake
-
-}
-
-export class Config {
-    
-    readonly guild: Guild;
-    
-    public get client(): Client {
-        return this.guild.client;
-    }
-    
-    public get guildId(): string {
-        return this.guild.id;
-    }
-    
-
-    readonly support: SupportSettings;
-
-    public toJSON() {
-        return { 
-            guildId: this.guildId,
-            support: this.support.toJSON()
-        };
-    }
-    constructor(guild: Guild, data?: serverConfig ) {
-        this.guild = guild;
-        if (data) this.support = new SupportSettings(this, data.support);
-        else
-            this.support = new SupportSettings(this);
-    }
-
-}
-
-export class ConfigManager {
-    readonly client: Client;
-
-    private _filepath = './Configs.json';
-
-    readonly cache = new Collection<Snowflake, Config>();
-    
-    /**
-     * loadConfigs
-     * @returns
-     */
-    public loadConfigs() {
-        const jsonstring = fs.readFileSync(this._filepath, 'utf-8');
-        try {
-            const data = JSON.parse(jsonstring) as serverConfig[];
-            data.map(async (sc) => this.cache.set(
-                sc.guildId, new Config(
-                    await this.client.guilds.fetch(sc.guildId), sc)));
-        }
-        catch (error) {
-            if (error instanceof Error || error instanceof DiscordjsError)
-                this.client.emit(Events.Error, error);
-            else throw error;
-        }
-        return this;
-    }
-    public toJSON() {
-        return this.cache.map((sc): serverConfig => {
-            return {
-                guildId: sc.guildId,
-                support: sc.support.toJSON()
-            };
-        });
-    }
-    public saveConfigs(){
-        fs.writeFile(this._filepath, JSON.stringify(this.toJSON(), null, '    '), (error) => {
-            if(error)
-                this.client.emit(Events.Error, error);
-        });
-    }
-    
-    public setConfigPath(path: string) {
-        this._filepath = path;
-        return this;
-    }
-
-    public create(guild: Guild){
-        const config = new Config(guild);
-        this.cache.set(guild.id, config);
-        return config;
-    }
-    
-    constructor(client: Client) {
-        this.client = client;
     }
 }

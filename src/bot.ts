@@ -3,7 +3,7 @@ import {
     Partials
 } from 'discord.js';
 import 'source-map-support/register.js';
-import { ConfigManager } from './Classes/Configs.js';
+import { ConfigManager } from './Classes/Config/ConfigManager.js';
 import { Client } from './Classes/index.js';
 import * as commands from './commands/index.js';
 import * as events from './events/index.js';
