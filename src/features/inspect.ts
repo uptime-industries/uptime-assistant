@@ -14,17 +14,23 @@ export async function userEmbed(member: GuildMember, colors: ColorResolvable) {
         .setAuthor({ name: member.user.tag, iconURL: iconURL })
         .setThumbnail(iconURL)
         .setColor(colors)
-        .setFields(
-            {
-                name: 'Nickname:', value: codeBlock(member.displayName), inline: true 
-            }, {
-                name: 'User ID:', value: codeBlock(member.id), inline: true 
-            }, {
-                name: 'Created at:', value: user.createdAt.toDiscordString('F'), inline: true 
-            }, {
-                name: 'Joined at:', value: member.joinedAt!.toDiscordString('F'), inline: true 
-            }
-        )
+        .setFields({
+            name: 'Nickname:',
+            value: codeBlock(member.displayName),
+            inline: true 
+        }, {
+            name: 'User ID:',
+            value: codeBlock(member.id),
+            inline: true 
+        }, {
+            name: 'Created at:',
+            value: user.createdAt.toDiscordString('F'),
+            inline: true 
+        }, {
+            name: 'Joined at:',
+            value: member.joinedAt!.toDiscordString('F'),
+            inline: true 
+        })
         .setImage(user.bannerURL({ size: 1024 })!);
 }
 

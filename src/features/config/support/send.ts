@@ -55,8 +55,8 @@ export async function send(interaction: ChatInputCommandInteraction, channel?: T
             .setCustomId('ticket')
             .setLabel('Create a Ticket')
             .setStyle(ButtonStyle.Primary)
-            .setEmoji(config?.buttonEmoji)
-        )];
+            .setEmoji(config?.buttonEmoji))];
+
     const message = await channel.send({
         embeds: [embed],
         components: row

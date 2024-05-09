@@ -1,8 +1,6 @@
-import {
-    ActionRowBuilder,
-    ChatInputCommandInteraction, ColorResolvable, ModalBuilder, TextInputBuilder, TextInputStyle
-} from 'discord.js';
+import { ChatInputCommandInteraction, ColorResolvable } from 'discord.js';
 import { serverConfigs } from '../../../bot.js';
+import { getEmbedModal } from '../../support/modals.js';
 
 export { send } from './send.js';
 
@@ -15,24 +13,7 @@ export { setOtherRole, setRole } from './role.js';
 export async function updateMessage(interaction: ChatInputCommandInteraction) {
     if (!interaction.inGuild()) return;
     const config = serverConfigs.cache.get(interaction.guildId)?.support;
-    const title = new TextInputBuilder()
-        .setCustomId('title')
-        .setLabel('Embed Title')
-        .setPlaceholder('Title for the support embed')
-        .setStyle(TextInputStyle.Short)
-        .setValue(config?.embedTitle!)
-        .setMaxLength(256);
-    const description = new TextInputBuilder()
-        .setCustomId('description')
-        .setLabel('Embed Description')
-        .setPlaceholder('Description for the support embed')
-        .setStyle(TextInputStyle.Paragraph)
-        .setValue(config?.embedDescription!)
-        .setMaxLength(2048);
-    interaction.showModal(new ModalBuilder()
-        .setCustomId(`embed`)
-        .setTitle('Support Embed Message')
-        .setComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(title), new ActionRowBuilder<TextInputBuilder>().addComponents(description)));
+    return interaction.showModal(getEmbedModal(config?.embedTitle!, config?.embedDescription!));
 }
 
 /**

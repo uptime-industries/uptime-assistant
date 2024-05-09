@@ -36,6 +36,7 @@ export function newTicketEmbed(subject: string, body: string, color: ColorResolv
  * @param data
  * @param embed
  * @param member
+ * @returns
  */
 export function closedTicketEmbed(embed: Embed, member: GuildMember) {
     const closedBy = `${member.displayName} at ${ (new Date).toDiscordString(TimestampStyles.ShortDateTime)}`;
@@ -59,6 +60,7 @@ export function closedTicketEmbed(embed: Embed, member: GuildMember) {
  *
  * @param embed
  * @param member
+ * @returns
  */
 export function reopenTicketEmbed(embed: Embed, member: GuildMember) {
     const reopenedBy = `${member.displayName} at ${ (new Date).toDiscordString(TimestampStyles.ShortDateTime)}`;
