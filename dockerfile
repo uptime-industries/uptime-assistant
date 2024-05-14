@@ -7,7 +7,7 @@ RUN npm ci
 
 COPY . .
 
-RUN npm build
+RUN npm run build
 
 FROM node:lts-iron AS runner
 WORKDIR /usr/bot
@@ -15,11 +15,11 @@ WORKDIR /usr/bot
 COPY *.json .
 COPY ./locales ./locales
 
-RUN npm install --omit=dev
+RUN npm ci --omit=dev
 
 COPY --from=builder /usr/bot/dist/ ./dist
 COPY ./src/*.json ./dist
 
 USER node
 
-CMD [ "npm", "run", "start" ]
+CMD [ "node", "." ]
