@@ -26,9 +26,7 @@ async function memberJoin(oldMember: GuildMember, newMember: GuildMember) {
             embeds: [(await userEmbed(newMember, Colors.Green))
                 .setTitle('Member Verified')
                 .setDescription('Member was verified or agreed to the rules')
-                .addFields(
-                    { name: 'More Info:', value: `${newMember}` }
-                )
+                .addFields({ name: 'More Info:', value: `${newMember}` })
                 .setTimestamp()],
             components: [new ActionRowBuilder<ButtonBuilder>()
                 .addComponents(moderateUserButton(newMember.user))]

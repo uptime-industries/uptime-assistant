@@ -2,7 +2,7 @@ import {
     APIRole,
     ChatInputCommandInteraction, Role
 } from 'discord.js';
-import { serverConfigs } from '../../../../bot.js';
+import { Config } from '../../../../Modal/Config.js';
 
 /**
  * update role wich is pinged when new tikets are created
@@ -13,7 +13,8 @@ export async function setRole(interaction: ChatInputCommandInteraction, role: Ro
     if (!interaction.inGuild()) return;
 
     const { guild, guildId } = interaction;
-    const guildConfig = serverConfigs.cache.get(guildId);
+    const guildConfig = await Config.findOne({ guildId });
+
     if (!guildConfig){ 
         await interaction.reply({
             content: 'configs not setupcontact support for help',
@@ -37,13 +38,11 @@ export async function setRole(interaction: ChatInputCommandInteraction, role: Ro
         }
         rRole = tRole;
     }
-
-    guildConfig.support.setRole(rRole);
-    serverConfigs.cache.set(interaction.guildId, guildConfig);
-    serverConfigs.saveConfigs();
+    guildConfig.support.roleId = rRole.id;
+    await guildConfig.save();
 
     await interaction.reply({
-        content: `${role} will now be notified when new tickets are created`,
+        content: `${rRole} will now be notified when new tickets are created`,
         ephemeral: true
     });
 }

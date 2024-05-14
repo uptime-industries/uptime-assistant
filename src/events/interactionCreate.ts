@@ -4,19 +4,26 @@ import {
     InteractionType
 } from 'discord.js';
 import { Event } from '../Classes/index.js';
-import { serverConfigs } from '../bot.js';
+import { Config } from '../Modal/Config.js';
 
 /**
  * Handles the creation of a new interaction.
  * @param interaction - The interaction object.
  */
 async function onInteractionCreate(interaction: Interaction) {
-    const {
-        client, type, guildId 
-    } = interaction;
+    const { client, type } = interaction;
 
-    if(interaction.inGuild() && !serverConfigs.cache.has(interaction.guildId))
-        serverConfigs.create(interaction.guild!);
+    if(interaction.inGuild()){
+        const { guild, guildId } = interaction;
+        const guildConfig = await Config.findOne({ guildId: guildId });
+        if(!guildConfig) 
+            await Config.create({
+                guildId: guildId,
+                name: guild?.name
+            });
+        else if (guildConfig.name !== guild?.name) 
+            await guildConfig.updateOne({ name: guild?.name! });
+    }
 
     const {
         commands, interactions, errorMessage, replyOnError

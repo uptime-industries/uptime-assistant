@@ -7,7 +7,7 @@ import {
     PermissionFlagsBits,
     TextChannel
 } from 'discord.js';
-import { serverConfigs } from '../../../../bot.js';
+import { Config } from '../../../../Modal/Config.js';
 import { messageLinkRow, newTicketRow } from '../../buttons.js';
 import { sendEmbed } from '../../embeds.js';
 
@@ -17,11 +17,12 @@ import { sendEmbed } from '../../embeds.js';
  * @param targetChannel target channel for the message to be sent
  */
 export async function send(interaction: ChatInputCommandInteraction, targetChannel?: TextChannel): Promise<void> {
-    const { channel } = interaction;
+    if (!interaction.inGuild()) return;
+    const { channel, guildId } = interaction;
     const neededPerms = PermissionFlagsBits.ManageThreads | PermissionFlagsBits.SendMessages | PermissionFlagsBits.SendMessagesInThreads;
-    const config = serverConfigs.cache.get(interaction.guildId!)?.support;
+    const guildConfig = await Config.findOne({ guildId });
     
-    if(!config?.role){
+    if(!guildConfig?.support.roleId){
         await interaction.reply({
             content: `Please set Role using </config support role:${interaction.client.application.commands.cache.find((ac) => ac.type == ApplicationCommandType.ChatInput && ac.name == 'config')?.id}>`,
             ephemeral: true
@@ -52,8 +53,8 @@ export async function send(interaction: ChatInputCommandInteraction, targetChann
     }
     
     const message = await targetChannel.send({
-        embeds: [sendEmbed(config)],
-        components: [newTicketRow(config.buttonEmoji)]
+        embeds: [sendEmbed(guildConfig)],
+        components: [newTicketRow(guildConfig.support.emoji)]
     });
 
     let row: ActionRowBuilder<ButtonBuilder>[] = [];

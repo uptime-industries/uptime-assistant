@@ -27,12 +27,11 @@ async function execute(auditLogEntry: GuildAuditLogsEntry, guild: Guild) {
                 new EmbedBuilder()
                     .setAuthor({ name: target.tag, iconURL: (avatarURL || undefined) })
                     .setTitle('Member Banned')
-                    .addFields(
-                        {
-                            name: 'Banned By', value: `<@${auditLogEntry.executorId}>`, inline: true 
-                        }, {
-                            name: 'Reason', value: auditLogEntry.reason!, inline: true 
-                        })
+                    .addFields({
+                        name: 'Banned By', value: `<@${auditLogEntry.executorId}>`, inline: true 
+                    }, {
+                        name: 'Reason', value: auditLogEntry.reason!, inline: true 
+                    })
                     .setThumbnail(avatarURL)
                     .setColor(Colors.Red)
                     .setTimestamp(auditLogEntry.createdAt)
@@ -46,12 +45,10 @@ async function execute(auditLogEntry: GuildAuditLogsEntry, guild: Guild) {
                 new EmbedBuilder()
                     .setAuthor({ name: target.tag, iconURL: (avatarURL || undefined) })
                     .setTitle('Member Kicked')
-                    .setFields(
-                        {
-                            name: 'Kicked By', value: `<@${auditLogEntry.executorId}>`, inline: true 
-                        }
-                        // { name: 'Reason', value: auditLogEntry.reason, inline: true },
-                    )
+                    .setFields({
+                        name: 'Kicked By', value: `<@${auditLogEntry.executorId}>`, inline: true 
+                    })
+                // { name: 'Reason', value: auditLogEntry.reason, inline: true },
                     .setThumbnail(avatarURL)
                     .setColor(Colors.Red)
                     .setTimestamp(auditLogEntry.createdAt)
@@ -76,13 +73,11 @@ async function execute(auditLogEntry: GuildAuditLogsEntry, guild: Guild) {
                 new EmbedBuilder()
                     .setAuthor({ name: target.tag, iconURL: (avatarURL || undefined) })
                     .setTitle(title)
-                    .addFields(
-                        {
-                            name: 'Action By', value: `<@${auditLogEntry.executorId}>`, inline: true 
-                        }, {
-                            name: 'Expires At', value: `${newDate.toDiscordString('F')}\n ${newDate.toDiscordString('R')}`, inline: true 
-                        }, { name: 'Reason', value: reason }
-                    )
+                    .addFields({
+                        name: 'Action By', value: `<@${auditLogEntry.executorId}>`, inline: true 
+                    }, {
+                        name: 'Expires At', value: `${newDate.toDiscordString('F')}\n ${newDate.toDiscordString('R')}`, inline: true 
+                    }, { name: 'Reason', value: reason })
                     .setColor(color)
                     .setThumbnail(avatarURL)
                     .setTimestamp(auditLogEntry.createdAt)

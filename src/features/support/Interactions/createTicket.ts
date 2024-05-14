@@ -4,9 +4,9 @@ import {
     ModalSubmitInteraction, ThreadAutoArchiveDuration
 } from 'discord.js';
 import { Interaction } from '../../../Classes/index.js';
-import { serverConfigs } from '../../../bot.js';
+import { Config } from '../../../Modal/Config.js';
 import { resolveMember } from '../../util.js';
-import { newTicketActionRow } from '../buttons.js';
+import { messageLinkRow, newTicketActionRow } from '../buttons.js';
 import { newTicketEmbed } from '../embeds.js';
 import { createTicket } from '../modals.js';
 
@@ -30,7 +30,10 @@ export const createModal = new Interaction<ModalSubmitInteraction>({ customIdPre
             return; 
         }
         interaction.deferReply({ ephemeral: true });
-        const config = serverConfigs.cache.get(guildId)?.support;
+
+        const guildConfig = await Config.findOne({ guildId });
+        const supportRole = guild?.roles.cache.get(guildConfig?.support.roleId!);
+        const otherRole = guildConfig?.support.otherRoleId ? guild?.roles.cache.get(guildConfig?.support.otherRoleId) : undefined;
         const subject = fields.getTextInputValue('subject');
         const body = fields.getTextInputValue('body');
         const guildMember = await resolveMember(member, guild!);
@@ -42,16 +45,15 @@ export const createModal = new Interaction<ModalSubmitInteraction>({ customIdPre
             reason: `Ticket was created by ${guildMember.displayName}`
         });
         
-        await thread.send({
-            content: `${interaction.user}${config?.role}`,
-            embeds: [newTicketEmbed(subject, body, config?.embedColor, guildMember)],
+        const message = await thread.send({
+            content: `${interaction.user}${supportRole}`,
+            embeds: [newTicketEmbed(subject, body, guildConfig?.support.color, guildMember)],
             components: [newTicketActionRow]
-        }).then(async m => await m.edit(m.content + `${config?.otherRole ? config?.otherRole : ''}`));
-
+        });
         await interaction.followUp({
             content: 'Ticket has been created ',
-            ephemeral: true
+            ephemeral: true,
+            components: [messageLinkRow(message)]
         });
-
-
+        await message.edit({ content: message.content + `${otherRole ? otherRole : ''}` });
     });

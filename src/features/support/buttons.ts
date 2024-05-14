@@ -33,9 +33,9 @@ export const closedTicketActionRow = new ActionRowBuilder<ButtonBuilder>()
     .setComponents(reopenTicket);
 
 /**
- *
- * @param emoji
- * @returns
+ * Creates buttons for a new Ticket
+ * @param emoji the Icon to display with the button
+ * @returns Action Row for a New ticket
  */
 export function newTicketRow(emoji: ComponentEmojiResolvable) {
     return new ActionRowBuilder<ButtonBuilder>()
@@ -47,9 +47,9 @@ export function newTicketRow(emoji: ComponentEmojiResolvable) {
 }
 
 /**
- * 
- * @param message
- * @returns
+ * Creates an Action Row for new ticket reply
+ * @param message the message from the thread
+ * @returns Action Row for a New ticket reply
  */
 export function messageLinkRow(message: Message) {
     return new ActionRowBuilder<ButtonBuilder>()

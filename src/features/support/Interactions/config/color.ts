@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction, ColorResolvable } from 'discord.js';
-import { serverConfigs } from '../../../../bot.js';
+import { Config } from '../../../../Modal/Config.js';
 
 /**
  * Update color of support embeds
@@ -10,11 +10,10 @@ export async function setColor(interaction: ChatInputCommandInteraction, color?:
     if (!interaction.inGuild()) return;
 
     const { guildId } = interaction;
-    const guildConfig = serverConfigs.cache.get(guildId);
-    
-    guildConfig?.support.setEmbedColor(color);
-    serverConfigs.cache.set(guildId, guildConfig!);
-    serverConfigs.saveConfigs();
+
+    const guildConfig = await Config.findOne({ guildId });
+    guildConfig!.support.color = color;
+    await guildConfig?.save();
 
     await interaction.reply({
         content: `Embed color has been updated. Send new message with </config support send:${interaction.client.application.commands.cache.find((c)=> c.name == 'config')?.id}>`,

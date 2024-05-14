@@ -2,7 +2,7 @@ import {
     APIRole,
     ChatInputCommandInteraction, Role
 } from 'discord.js';
-import { serverConfigs } from '../../../../bot.js';
+import { Config } from '../../../../Modal/Config.js';
 
 /**
  * set a role witch will be added to a support thread without notification
@@ -13,7 +13,7 @@ export async function setOtherRole(interaction: ChatInputCommandInteraction, rol
     if (!interaction.inGuild()) return;
 
     const { guild, guildId } = interaction;
-    const guildConfig = serverConfigs.cache.get(guildId);
+    const guildConfig = await Config.findOne({ guildId });
     if (!guildConfig){ 
         await interaction.reply({
             content: 'configs not setup contact support for help',
@@ -39,9 +39,8 @@ export async function setOtherRole(interaction: ChatInputCommandInteraction, rol
         rRole = tRole;
     }
 
-    guildConfig.support.setOtherRole(rRole);
-    serverConfigs.cache.set(guildId, guildConfig);
-    serverConfigs.saveConfigs();
+    guildConfig.support.otherRoleId = rRole.id;
+    await guildConfig.save();
 
     await interaction.reply({
         content: `${role} will now be added to new tickets are created`,

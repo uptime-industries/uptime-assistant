@@ -2,8 +2,8 @@ import {
     GatewayIntentBits as Intents,
     Partials
 } from 'discord.js';
+import mongoose from 'mongoose';
 import 'source-map-support/register.js';
-import { ConfigManager } from './Classes/Config/ConfigManager.js';
 import { Client } from './Classes/index.js';
 import * as commands from './commands/index.js';
 import * as events from './events/index.js';
@@ -57,8 +57,11 @@ for (const modal of Object.values(modals))
 //     client.interactions.addSelectMenu(selectMenu);
 // }
 
+// connect to MongoDB
+await mongoose.connect(process.env.MONGODB_URI!);
+
 // Bot logins to Discord services
-client.login(process.env.TOKEN)
+await client.login(process.env.TOKEN)
     .then(() => {
         
         // Skip if no-deployment flag is set, else deploys command
@@ -69,8 +72,3 @@ client.login(process.env.TOKEN)
             client.commands.register();
         
     });
-
-export const serverConfigs = new ConfigManager(client)
-    .setConfigPath('./configs.json')
-    .loadConfigs();
-    

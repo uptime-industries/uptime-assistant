@@ -1,5 +1,5 @@
 import { ChatInputCommandInteraction } from 'discord.js';
-import { serverConfigs } from '../../../../bot.js';
+import { Config } from '../../../../Modal/Config.js';
 import { getEmbedModal } from '../../modals.js';
 
 /**
@@ -8,6 +8,6 @@ import { getEmbedModal } from '../../modals.js';
  */
 export async function updateMessage(interaction: ChatInputCommandInteraction) {
     if (!interaction.inGuild()) return;
-    const config = serverConfigs.cache.get(interaction.guildId)?.support;
-    await interaction.showModal(getEmbedModal(config?.embedTitle!, config?.embedDescription!));
+    const config = await Config.findOne({ guildId: interaction.guildId });
+    await interaction.showModal(getEmbedModal(config?.support.title!, config?.support.description!));
 }

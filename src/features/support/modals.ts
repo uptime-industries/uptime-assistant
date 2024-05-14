@@ -2,6 +2,7 @@ import {
     ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle
 } from 'discord.js';
 
+// Subject line input
 const subject = new TextInputBuilder()
     .setCustomId('subject')
     .setLabel('subject')
@@ -9,6 +10,8 @@ const subject = new TextInputBuilder()
     .setRequired(true)
     .setStyle(TextInputStyle.Short)
     .setMaxLength(256);
+
+// description input
 const body = new TextInputBuilder()
     .setCustomId('body')
     .setLabel('body')
@@ -17,11 +20,11 @@ const body = new TextInputBuilder()
     .setStyle(TextInputStyle.Paragraph)
     .setMaxLength(512);
 
+// Modal builder for ticket creation
 export const createTicket = new ModalBuilder()
     .setCustomId('ticket')
     .setTitle('Create a Ticket')
     .setComponents(new ActionRowBuilder<TextInputBuilder>().addComponents(subject), new ActionRowBuilder<TextInputBuilder>().addComponents(body));
-
 
 /**
  * Create Modal Builder for updating the support embed

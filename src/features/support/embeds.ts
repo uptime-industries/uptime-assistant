@@ -1,7 +1,8 @@
 import {
     ColorResolvable, Embed, EmbedBuilder, GuildMember
 } from 'discord.js';
-import { SupportSettings } from '../../Classes/Config/Config.js';
+import { Document, Types } from 'mongoose';
+import { IConfig } from '../../Modal/Config.js';
 
 /**
  * Generates embed for tickets
@@ -76,13 +77,13 @@ export function reopenTicketEmbed(embed: Embed) {
 }
 
 /**
- * 
- * @param config
- * @returns
+ * Generates new Ticket Embed
+ * @param config Document from findOne
+ * @returns New ticket embed builder
  */
-export function sendEmbed(config: SupportSettings) {
+export function sendEmbed(config: (Document<unknown, {}, IConfig> & IConfig & { _id: Types.ObjectId; }) | null) {
     return new EmbedBuilder()
-        .setTitle(config?.embedTitle)
-        .setDescription(config?.embedDescription)
-        .setColor(config.embedColor != undefined ? config.embedColor : null);
+        .setTitle(config?.support.title!)
+        .setDescription(config?.support.description!)
+        .setColor(config?.support.color != undefined ? config?.support.color : null);
 }
