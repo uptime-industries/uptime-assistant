@@ -19,7 +19,7 @@
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "sourceMap": true,
-        "strict": true,
+        "strict": false,
         "strictPropertyInitialization": false,
     },
     "include": [

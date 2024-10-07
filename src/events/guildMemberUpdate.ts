@@ -10,18 +10,19 @@ export default new Event()
     .setName(Events.GuildMemberUpdate)
     .setOnce(false)
     .setExecute(async (oldMember: GuildMember, newMember: GuildMember) => {
-        if (oldMember.pending && !newMember.pending) 
+        if (oldMember.pending && !newMember.pending) {
             memberJoin(oldMember, newMember);
+        }
     });
 
 /**
- * Function trigers on when a member is verifiyed
+ * Function triggers on when a member is verified
  * @param oldMember - old member state
  * @param newMember - new member state
  */
 async function memberJoin(oldMember: GuildMember, newMember: GuildMember) {
     const channel = oldMember.guild.channels.cache.find<GuildTextBasedChannel>((c, k): c is GuildTextBasedChannel => k == welcomeChannelID && c.isTextBased());
-    if (channel !== undefined)
+    if (channel !== undefined) {
         channel.send({
             embeds: [(await userEmbed(newMember, Colors.Green))
                 .setTitle('Member Verified')
@@ -31,4 +32,5 @@ async function memberJoin(oldMember: GuildMember, newMember: GuildMember) {
             components: [new ActionRowBuilder<ButtonBuilder>()
                 .addComponents(moderateUserButton(newMember.user))]
         });
+    }
 }

@@ -41,7 +41,7 @@ export class InteractionHandler {
     }
 
     addButton(interaction: Interaction<ButtonInteraction>) {
-        this.buttons.set(interaction.name, interaction);
+        this.buttons.set(interaction.customIdPrefix, interaction);
         return this;
     }
 
@@ -56,7 +56,7 @@ export class InteractionHandler {
     }
 
     addModal(interaction: Interaction<ModalSubmitInteraction>) {
-        this._modals.set(interaction.name, interaction);
+        this._modals.set(interaction.customIdPrefix, interaction);
         return this;
     }
 
@@ -71,7 +71,7 @@ export class InteractionHandler {
     }
 
     addSelectMenu(interaction: Interaction<AnySelectMenuInteraction>) {
-        this._selectMenus.set(interaction.name, interaction);
+        this._selectMenus.set(interaction.customIdPrefix, interaction);
         return this;
     }
 

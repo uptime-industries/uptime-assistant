@@ -4,10 +4,11 @@ import { Event } from '../../Classes/index.js';
 export default new Event({
     name: Events.Debug,
     execute: async (info: string) => {
-        if (info.startsWith('[WS => ')) 
+        if (info.startsWith('[WS => ')) {
             return;
+        }
         
-        // eslint-disable-next-line no-console
+         
         console.debug(info);
     }
 });

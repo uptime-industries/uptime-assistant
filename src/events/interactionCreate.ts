@@ -13,16 +13,18 @@ import { Config } from '../Modal/Config.js';
 async function onInteractionCreate(interaction: Interaction) {
     const { client, type } = interaction;
 
-    if(interaction.inGuild()){
+    if (interaction.inGuild()) {
         const { guild, guildId } = interaction;
         const guildConfig = await Config.findOne({ guildId: guildId });
-        if(!guildConfig) 
+        if (!guildConfig) {
             await Config.create({
                 guildId: guildId,
                 name: guild?.name
             });
-        else if (guildConfig.name !== guild?.name) 
-            await guildConfig.updateOne({ name: guild?.name! });
+        }
+        else if (guildConfig.name !== guild?.name) {
+            await guildConfig.updateOne({ name: guild?.name });
+        }
     }
 
     const {
@@ -60,13 +62,15 @@ async function onInteractionCreate(interaction: Interaction) {
                 break;
 
             case InteractionType.MessageComponent:
-                if (interaction.isButton()) 
-                    // If the interaction is a button interaction, execute the corresponding button handler
+                // If the interaction is a button interaction, execute the corresponding button handler
+                if (interaction.isButton()) {
                     await interactions.runButton(interaction);
+                }
                 
-                else if (interaction.isAnySelectMenu()) 
-                    // If the interaction is a select menu interaction, execute the corresponding select menu handler
+                // If the interaction is a select menu interaction, execute the corresponding select menu handler
+                else if (interaction.isAnySelectMenu()) {
                     await interactions.runSelectMenus(interaction);
+                }
                 break;
             default:
                 break;
@@ -74,22 +78,26 @@ async function onInteractionCreate(interaction: Interaction) {
     }
     catch (error) {
         
-        if (error instanceof DiscordAPIError || error instanceof Error)
+        if (error instanceof DiscordAPIError || error instanceof Error) {
             client.emit(Events.Error, error);
-        else throw error;
+        }
+        else {
+            throw error;
+        }
 
         // If the interaction is repliable, handle the error with a reply
         if (interaction.isRepliable() && error instanceof Error) {
         
             if (!replyOnError) return;
         
-            if (interaction.deferred) 
             // If the interaction is deferred, follow up with an ephemeral error message
+            if (interaction.deferred) {
                 await interaction.followUp({ content: errorMessage, ephemeral: true }).catch((e) => client.emit(Events.Error, e));
-                
-            else 
+            }
             // If the interaction is not deferred, reply with an ephemeral error message
+            else {
                 await interaction.reply({ content: errorMessage, ephemeral: true }).catch((e) => client.emit(Events.Error, e));
+            }
 
         }
         

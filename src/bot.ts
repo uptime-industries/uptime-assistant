@@ -27,29 +27,33 @@ const client = new Client({
     receiveModals: true,
     receiveAutocomplete: true,
     replyOnError: true,
-    // replyMessageOnError: 'message on comand error',
+    // replyMessageOnError: 'message on command error',
     splitCustomIDOn: '_',
-    useDefaultInterctionEvent: false
+    useDefaultInteractionEvent: false
 });
 
 // Load Events
-for (const event of Object.values(events)) 
+for (const event of Object.values(events)) {
     client.events.add(event);
+}
 
 
 // Load commands 
-for (const command of Object.values(commands)) 
+for (const command of Object.values(commands)) {
     client.commands.add(command);
+}
 
 
 // Load buttons
-for (const button of Object.values(buttons)) 
+for (const button of Object.values(buttons)) {
     client.interactions.addButton(button);
+}
 
 
 // Load modals
-for (const modal of Object.values(modals)) 
+for (const modal of Object.values(modals)) {
     client.interactions.addModal(modal);
+}
 
 
 // Load selectMenus
@@ -65,10 +69,11 @@ await client.login(process.env.TOKEN)
     .then(() => {
         
         // Skip if no-deployment flag is set, else deploys command
-        if (!process.argv.includes('--no-deployment')) 
-            // removes guild command from set guild
-            // client.commands.deregisterGuildCommands(process.env.GUILDID);
-            // deploys commands
+        if (!process.argv.includes('--no-deployment')) {
+        // removes guild command from set guild
+        // client.commands.deregisterGuildCommands(process.env.GUILDID);
+        // deploys commands
             client.commands.register();
+        }
         
     });

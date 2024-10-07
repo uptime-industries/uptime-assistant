@@ -32,10 +32,10 @@ export class LocaleBundle {
      * @param i18n Host i18n object
      * @param locale The locale of this object
      */
-    constructor(i18n: i18n, locale: Locale) {
+    constructor(i18n: i18n, locale:Locale) {
         this.locale = locale;
         this.i18n = i18n;
-        if (this.locale === i18n.fallbacklLocale) this.isFallback = true;
+        if (this.locale === i18n.fallbackLocale) this.isFallback = true;
     }
 
     /**
@@ -44,17 +44,17 @@ export class LocaleBundle {
      * @param bundle The bundle you wish to add
      * @returns The LocaleBundle
      */
-    addBundle(name: string, bundle: FluentBundle) {
+    addBundle(name: string, bundle:FluentBundle) {
         this.bundles.set(name, bundle);
         return this;
     }
 
     /**
-     * Add a fluent bundle as a comman bundle
+     * Add a fluent bundle as a common bundle
      * @param bundle The bundle you wish to add
      * @returns The LocaleBundle
      */
-    setCommonBundle(bundle: FluentBundle) {
+    setCommonBundle(bundle:FluentBundle) {
         this.bundles.set(common, bundle);
         return this;
     }
@@ -62,46 +62,62 @@ export class LocaleBundle {
     /**
      * get a message from  bundle
      * @param key the key of the message
-     * @param bundleName The name of the budle where the message should be retreved from
+     * @param bundleName The name of the bundle where the message should be retrieved from
      * @returns Fluent message
      */
-    private getMessageBundle(key: string, bundleName: string): { bundle: FluentBundle, message: Message } {
-        let message: { bundle: FluentBundle; message: Message; } | undefined;
+    private getMessageBundle(key:string, bundleName:string): { bundle: FluentBundle, message: Message } {
+        let bundle: FluentBundle | undefined;
+
         // Checks for the bundle with the provided name
         if (this.has(bundleName)) {
-            message = this.getMessage(this.get(bundleName), key);
-            if (message !== undefined) return message;
+            bundle = this.get(bundleName)!;
+            if (bundle.hasMessage(key)) {
+                return {
+                    bundle,
+                    message: bundle.getMessage(key)!
+                };
+            }
+            
         }
 
-        // Checks comman file of this Locale
-        else if (this.has(common)) {
-            message = this.getMessage(this.get(common), key);
-            if (message !== undefined) return message;
+        // Checks common file of this Locale
+        if (this.has(common)) {
+            bundle = this.get(common)!;
+            if (bundle.hasMessage(key)) {
+                return {
+                    bundle,
+                    message: bundle.getMessage(key)!
+                };
+            }
+            
         }
 
         const fallback = this.i18n.getFallbackLocale();
 
         // Checks if the fallback has a bundle of the fallback locale
-        if (fallback !== undefined) 
-            if (fallback.has(bundleName)) {
-                message = this.getMessage(fallback.get(bundleName), key);
-                if (message !== undefined) return message;
+        if (fallback && fallback.has(bundleName)) {
+            bundle = fallback.get(bundleName)!;
+            if (bundle.hasMessage(key)) {
+                return {
+                    bundle,
+                    message: bundle.getMessage(key)!
+                };
             }
-
-            // Checks fallback common file
-            else if (fallback.has(common)) {
-                message = this.getMessage(fallback.get(common), key);
-                if (message !== undefined) return message;
-            }
-        throw Error(`${key} not found in common in fallback locale`);
-    }
-    
-    private getMessage(bundle: FluentBundle | undefined, key: string) {
-        if (bundle !== undefined && bundle.hasMessage(key)){
-            const message = bundle.getMessage(key);
-            if (message)
-                return { bundle, message }; 
+            
         }
+
+        // Checks fallback common file
+        if (fallback && fallback.has(common)) {
+            bundle = fallback.get(common)!;
+            if (bundle.hasMessage(key)) {
+                return {
+                    bundle,
+                    message: bundle.getMessage(key)!
+                };
+            }
+            
+        }
+        throw Error(`${key} not found in common in fallback locale`);
     }
 
     /**
@@ -109,7 +125,7 @@ export class LocaleBundle {
      * @param bundleName Name of the bundle to check
      * @returns `true` or `false`
      */
-    has(bundleName: string) {
+    has(bundleName:string) {
         return this.bundles.has(bundleName);
     }
 
@@ -118,32 +134,31 @@ export class LocaleBundle {
      * @param bundleName Name of the bundle to get
      * @returns FluentBundle
      */
-    get(bundleName: string) {
+    get(bundleName:string) {
         return this.bundles.get(bundleName);
     }
 
     /**
-     * Resove bundle key and variables
-     * @param key key of message to be resoved
-     * @param bundleName name of the bendle wich to pull from
-     * @param options veriables to be resoved
+     * Resolve bundle key and variables
+     * @param key key of message to be resolved
+     * @param bundleName name of the bundle which to pull from
+     * @param options variables to be resolved
      * @returns the resolved message as a string
      */
-    t(key: string, bundleName: string, options?: fluentVariables) {
+    t(key:string, bundleName:string, options?: fluentVariables) {
 
-        // finds the message and retuens it with the budle where it was found
+        // finds the message and returns it with the bundle where it was found
         const { bundle, message } = this.getMessageBundle(key, bundleName);
 
         const errors: Error[] = [];
 
-        // appliy formating
-        if (message.value == null) throw new Error('Message value error');
-        const res = bundle.formatPattern(message.value, options, errors);
+        // apply formatting
+        const res = bundle.formatPattern(message.value!, options, errors);
 
-        // Returns if any errors occured
-        if (errors.length) 
+        // Returns if any errors occurred
+        if (errors.length) {
             throw Error(`i18n - Errors with ${key}`, { cause: errors });
-        
+        }
         
         return res;
     }

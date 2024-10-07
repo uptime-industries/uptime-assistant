@@ -35,7 +35,7 @@ export class i18n {
         
     }
 
-    get fallbacklLocale() {
+    get fallbackLocale() {
         return this._fallbackLocale;
     }
 
@@ -44,25 +44,24 @@ export class i18n {
      * @returns LocaleBundle for the fall back locale
      */
     getFallbackLocale() {
-        if (this._fallbackLocale == undefined)
-            return undefined;
-        return this.getLocale(this._fallbackLocale);
+        if (this.fallbackLocale === undefined) return undefined;
+        else return this.getLocale(this.fallbackLocale);
     }
 
     /**
-     * Set the gobal resource file
+     * Set the global resource file
      * @param filePath file path to the file in question
      * @returns the i18n object
      */
-    setGlobalResource(filePath: string) {
+    setGlobalResource(filePath:string) {
         // get file
         const file = readFileSync(join(filePath, 'global.ftl'), { encoding: 'utf-8' });
-        // resovle file
+        // resolve file
         this.global = new FluentResource(file);
         return this;
     }
 
-    setLocale(filePath: string, locale: Locale) {
+    setLocale(filePath:string, locale: Locale) {
         // get files
         const files = (readdirSync(filePath))
             .filter((file) => file.endsWith('.ftl'));
@@ -94,7 +93,7 @@ export class i18n {
      * @param locale the locale to set
      * @returns this
      */
-    setFallbackLocale(locale: Locale) {
+    setFallbackLocale(locale:Locale) {
         this._fallbackLocale = locale;
         return this;
     }
@@ -104,33 +103,30 @@ export class i18n {
      * @param locale the locale to get
      * @returns LocaleBundle
      */
-    getLocale(locale: Locale) {
+    getLocale(locale:Locale) {
         const hasLocale = this.locales.has(locale);
-        let hasFallbackLocale: boolean;
-        if (this._fallbackLocale !== undefined) hasFallbackLocale = this.locales.has(this._fallbackLocale);
-        else hasFallbackLocale = false;
-        
-        let returnLocale: Locale;
+        const hasFallbackLocale = this._fallbackLocale ? this.locales.has(this._fallbackLocale) : false;
+        let returnLocale:Locale;
 
         // Return requested locale
-        if (hasLocale) 
+        if (hasLocale) {
             returnLocale = locale;
-        
+        }
         
         // Return fallback locale
-        else if (this._fallbackLocale && hasFallbackLocale) 
+        else if (this._fallbackLocale && hasFallbackLocale) {
             returnLocale = this._fallbackLocale;
-        
+        }
         
         // Throw if fallback is not set
-        else if (!this._fallbackLocale) 
+        else if (!this._fallbackLocale) {
             throw Error('Fallback Locale not set');
-        
+        }
         
         // Throw if fallback is present but not added
-        else 
+        else {
             throw Error('Fallback Locale not added to i18n');
-        
+        }
         
 
         return this.locales.get(returnLocale);
@@ -140,15 +136,13 @@ export class i18n {
     /**
      * Translate and formate a key
      * @param key key for the message to get
-     * @param bundleName the bundle wher it is located
+     * @param bundleName the bundle were it is located
      * @param locale the locale to target
      * @param options Additional options
-     * @returns The traslated and formated string
+     * @returns The translated and formatted string
      */
-    t(key: string, bundleName: string, locale: Locale, options?: fluentVariables) {
-        const bundle = this.getLocale(locale);
-        if (bundle == undefined) return `Unable to find bundle \'${bundleName}\'`;
-        return bundle.t(key, bundleName, options);
+    t(key:string, bundleName:string, locale:Locale, options?: fluentVariables) {
+        return this.getLocale(locale)?.t(key, bundleName, options);
     }
 
     /**
@@ -160,9 +154,9 @@ export class i18n {
      */
     discordLocalizationRecord(key: string, bundleName: string): LocalizationMap {
         const res: LocalizationMap = {};
-        for (const [ locale, obj ] of this.locales) 
+        for (const [ locale, obj ] of this.locales) {
             res[locale] = obj.t(key, bundleName);
-        
+        }
         return res;
     }
 }

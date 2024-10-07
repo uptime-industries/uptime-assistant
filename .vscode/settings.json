@@ -8,7 +8,7 @@
 		"source.fixAll": "explicit",
 		"source.organizeImports": "explicit"
 	},
-    "eslint.experimental.useFlatConfig": true,
+    "eslint.useFlatConfig": true,
 	"eslint.workingDirectories": [
 		{
 			"mode": "auto"
@@ -16,5 +16,9 @@
 	],
 	"yaml.schemas": {
 		"https://json.schemastore.org/github-issue-config.json": "/.github/ISSUE_TEMPLATE/config.yml"
-	}
+    },
+    "cSpell.words": [
+        "predev",
+        "Repliable"
+    ]
 }

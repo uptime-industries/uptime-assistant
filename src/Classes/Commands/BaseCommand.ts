@@ -2,7 +2,7 @@ import {
     ChatInputCommandInteraction, ContextMenuCommandBuilder, ContextMenuCommandInteraction, SlashCommandBuilder,
     Snowflake
 } from 'discord.js';
-import { SlashCommandBuilders } from './types.js';
+import { AnySlashCommandBuilder, ReturnableInteraction } from './types.js';
 
 SlashCommandBuilder;
 
@@ -10,7 +10,7 @@ SlashCommandBuilder;
  * Slash command or context command
  */
 export class BaseCommand<
-    TypeBuilder extends SlashCommandBuilders | ContextMenuCommandBuilder,
+    TypeBuilder extends AnySlashCommandBuilder | ContextMenuCommandBuilder,
     TypeInteraction extends ChatInputCommandInteraction | ContextMenuCommandInteraction
 > {
     // The constructor for the registration for the command
@@ -19,7 +19,7 @@ export class BaseCommand<
     protected _guildIds: Snowflake[] = [];
 
     // Method that is run when command is executed
-    protected _execute: (interaction: TypeInteraction) => Promise<void>;
+    protected _execute: (interaction: TypeInteraction) => Promise<ReturnableInteraction> | ReturnableInteraction;
 
     get name() {
         return this._builder.name;
@@ -48,7 +48,7 @@ export class BaseCommand<
         return this._execute;
     }
 
-    set execute(execute: (interaction: TypeInteraction) => Promise<void>) {
+    set execute(execute: (interaction: TypeInteraction) => Promise<ReturnableInteraction> | ReturnableInteraction) {
         this._execute = execute;
     }
 
@@ -62,7 +62,7 @@ export class BaseCommand<
      * @param execute function passed in
      * @returns The modified object
      */
-    setExecute(execute: (interaction: TypeInteraction) => Promise<void>): this {
+    setExecute(execute: (interaction: TypeInteraction) => Promise<ReturnableInteraction> | ReturnableInteraction): this {
         this.execute = execute;
         return this;
     }

@@ -1,14 +1,13 @@
 import {
-    ApplicationCommandType,
-    AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandSubcommandsOnlyBuilder
+    ApplicationCommandType, AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder
 } from 'discord.js';
 import { BaseCommand } from './BaseCommand.js';
-import { SlashCommandBuilders } from './types.js';
+import { AnySlashCommandBuilder } from './types.js';
 
 /**
  * Slash command
  */
-export class ChatInputCommand extends BaseCommand<SlashCommandBuilders, ChatInputCommandInteraction> {
+export class ChatInputCommand extends BaseCommand<AnySlashCommandBuilder, ChatInputCommandInteraction> {
 
     /**
      * Runs when client receives and Autocomplete interaction
@@ -16,7 +15,7 @@ export class ChatInputCommand extends BaseCommand<SlashCommandBuilders, ChatInpu
      */
     protected _autocomplete?: (interaction: AutocompleteInteraction) => Promise<void>;
 
-    get autocomplete(): ((interaction: AutocompleteInteraction) => Promise<void>) | undefined{
+    get autocomplete(): ((interaction: AutocompleteInteraction) => Promise<void>) | undefined {
         return this._autocomplete;
     }
 
@@ -30,16 +29,16 @@ export class ChatInputCommand extends BaseCommand<SlashCommandBuilders, ChatInpu
     
     /**
      * Set the command builder method
-     * @param input Slah command builder or callback
+     * @param input Slash command builder or callback
      * @returns The modified object
      */
-    setBuilder(input: SlashCommandBuilder | ((commandBuilder: SlashCommandBuilder) => SlashCommandBuilder | SlashCommandSubcommandsOnlyBuilder | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>)): this {
-        if (typeof input === 'function') 
+    setBuilder(input: SlashCommandBuilder | ((commandBuilder: SlashCommandBuilder) => AnySlashCommandBuilder)): this {
+        if (typeof input === 'function') {
             this._builder = input(new SlashCommandBuilder());
-        
-        else 
+        }
+        else {
             this._builder = input;
-        
+        }
         return this;
     }
 

@@ -1,5 +1,6 @@
 import {
     ChannelType,
+    InteractionContextType,
     PermissionFlagsBits
 } from 'discord.js';
 import { ChatInputCommand } from '../../Classes/index.js';
@@ -9,7 +10,7 @@ export default new ChatInputCommand()
     .setBuilder((builder) => builder
         .setName('config')
         .setDescription('Update bot configs')
-        .setDMPermission(false)
+        .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
         .addSubcommandGroup((subcommandGroup) => subcommandGroup
             .setName('support')
@@ -29,7 +30,7 @@ export default new ChatInputCommand()
                 .setDescription('Select support role to tag')
                 .addRoleOption((option) => option
                     .setName('role')
-                    .setDescription('Role wich will be pinged when a ticket is opened')
+                    .setDescription('Role which will be pinged when a ticket is opened')
                     .setRequired(true))
             )
             .addSubcommand((subcommand) => subcommand

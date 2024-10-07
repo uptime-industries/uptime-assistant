@@ -1,25 +1,35 @@
-import { Client, Collection } from 'discord.js';
-import assert from 'node:assert/strict';
-import { Event } from '../Event.js';
+import {
+    Client, Collection, Events
+} from 'discord.js';
+import { Event, ValidEvent } from '../Event.js';
+
+
 
 export class EventHandler {
     readonly client: Client;
 
     protected events: Collection<string, Event> = new Collection();
 
+    protected validateEvent(event: Event): event is ValidEvent   {
+        return typeof event.name !== 'undefined' && typeof event.execute !== 'undefined';
+    }
+
     /**
      * Add Event to Event handler
      * @param event event to add to handler
      */
     add(event: Event) {
-        const {
-            name, once, execute
-        } = event;
-        assert(typeof name !== 'undefined', `Event has no name`);
-        assert(typeof execute !== 'undefined', `Event ${name} does not have a execute function`);
-        if (once) this.client.once(name, execute);
-        else this.client.on(name, execute);
-        this.events.set(name, event);
+        if (this.validateEvent(event)) {
+            if (event.once) this.client.once(event.name, event.execute);
+            else this.client.on(event.name, event.execute);
+            this.events.set(event.name, event);
+            return;
+        }
+        else {
+            this.client.emit(Events.Error, new Error('Event missing required data', { cause: event }));
+        }
+        
+        
     }
 
     get size() {

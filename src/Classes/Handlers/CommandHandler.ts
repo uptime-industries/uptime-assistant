@@ -1,35 +1,33 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
     ApplicationCommandType,
-    AutocompleteInteraction, ChatInputCommandInteraction, Collection,
-    DiscordjsError,
+    AutocompleteInteraction, ChatInputCommandInteraction, Collection, ContextMenuCommandInteraction,
     Events,
-    MessageContextMenuCommandInteraction,
-    REST,
     RESTPostAPIChatInputApplicationCommandsJSONBody,
     RESTPostAPIContextMenuApplicationCommandsJSONBody,
     Routes,
-    Snowflake,
-    UserContextMenuCommandInteraction
+    Snowflake
 } from 'discord.js';
 import assert from 'node:assert/strict';
 import { Client } from '../Client/index.js';
-import {
-    ChatInputCommand, Commands, ContextMenuCommand
-} from '../Commands/index.js';
+import { ChatInputCommand, ContextMenuCommand } from '../Commands/index.js';
 
 
 export class CommandHandler {
+
+    // Parent client of the handler
     readonly client: Client;
 
-    protected readonly rest: REST;
-
+    // Slash commands in the handler
     protected _chatCommands = new Collection<string, ChatInputCommand>();
 
-    protected _userContextMenus = new Collection<string, ContextMenuCommand<UserContextMenuCommandInteraction>>();
+    // User context commands in the handler
+    protected _userContextMenus = new Collection<string, ContextMenuCommand>();
 
-    protected _messageContextMenus = new Collection<string, ContextMenuCommand<MessageContextMenuCommandInteraction>>();
+    // Message context commands in the handler
+    protected _messageContextMenus = new Collection<string, ContextMenuCommand>();
 
-    get userContexMenus() {
+    get userContextMenus() {
         return this._userContextMenus;
     }
 
@@ -37,27 +35,44 @@ export class CommandHandler {
         return this._chatCommands;
     }
 
-    private validateAplicationCommand(AplicationCommand: Commands, type: ApplicationCommandType) {
-        assert(typeof AplicationCommand.execute !== 'undefined', 'excute function not present');
-        assert(typeof AplicationCommand.builder !== 'undefined', 'builder is not present');
-        if (AplicationCommand.type !== type) new Error('Command Type does not match Exspected');
+    get rest() {
+        return this.client.rest;
     }
 
-    add(command: ChatInputCommand | ContextMenuCommand<UserContextMenuCommandInteraction> |
-        ContextMenuCommand<MessageContextMenuCommandInteraction>) {
+    /**
+     * Command validation test that expected values are present
+     * @param ApplicationCommand the command being inspected
+     * @param type type of application command to be expected
+     */
+    private validateApplicationCommand(ApplicationCommand: ContextMenuCommand | ChatInputCommand, type: ApplicationCommandType) {
+        assert(typeof ApplicationCommand.execute !== 'undefined', 'execute function not present');
+        assert(typeof ApplicationCommand.builder !== 'undefined', 'builder is not present');
+        if (ApplicationCommand.type !== type) new Error('Command Type does not match Expected');
+    }
+
+    /**
+     * Add command to command handler
+     * @param command Command to add
+     * @returns the command handler
+     */
+    add(command: ChatInputCommand | ContextMenuCommand) {
         const { type } = command;
-
-        this.validateAplicationCommand(command, type);
-
+        try {
+            this.validateApplicationCommand(command, type);
+        }
+        catch (error) {
+            this.client.emit(Events.Error, error as Error);
+        }
+		
         switch (type) {
             case ApplicationCommandType.ChatInput:
                 this._chatCommands.set(command.builder.name, command);
                 break;
             case ApplicationCommandType.Message:
-                this._messageContextMenus.set(command.builder.name, command as ContextMenuCommand<MessageContextMenuCommandInteraction>);
+                this._messageContextMenus.set(command.builder.name, command as ContextMenuCommand);
                 break;
             case ApplicationCommandType.User:
-                this._userContextMenus.set(command.builder.name, command as ContextMenuCommand<UserContextMenuCommandInteraction>);
+                this._userContextMenus.set(command.builder.name, command as ContextMenuCommand);
                 break;
             default:
                 break;
@@ -65,47 +80,58 @@ export class CommandHandler {
         return this;
     }
 
+    /**
+     * Add a collection of chat commands to the handler
+     * @param commands Collections of chat commands
+     * @returns The command handler
+     */
     addChatCommands(commands: Collection<string, ChatInputCommand>) {
-        for (const [ name, command ] of commands) 
+        for (const [ name, command ] of commands) {
             try {
-                this.validateAplicationCommand(command, ApplicationCommandType.ChatInput);
+                this.validateApplicationCommand(command, ApplicationCommandType.ChatInput);
                 this._chatCommands.set(name, command);
             }
             catch (error) {
-                if (error instanceof Error || error instanceof DiscordjsError)
-                    this.client.emit(Events.Error, error);
-                else throw error;
+                this.client.emit(Events.Error, new Error(`Command "${name}" had an error: {error}`));
             }
+        }
         
         return this;
     }
 
-    addUserContextMenus(commands: Collection<string, ContextMenuCommand<UserContextMenuCommandInteraction>>) {
-        for (const [ name, command ] of commands) 
+    /**
+     * Add a collection of user context commands to the handler
+     * @param commands Collections of user context commands
+     * @returns The command handler
+     */
+    addUserContextMenus(commands: Collection<string, ContextMenuCommand>) {
+        for (const [ name, command ] of commands) {
             try {
-                this.validateAplicationCommand(command, ApplicationCommandType.User);
+                this.validateApplicationCommand(command, ApplicationCommandType.User);
                 this._userContextMenus.set(name, command);
             }
             catch (error) {
-                if (error instanceof Error || error instanceof DiscordjsError)
-                    this.client.emit(Events.Error, error);
-                else throw error;
+                this.client.emit(Events.Error, new Error(`Command "${name}" had an error: {error}`));
             }
-        
+        }
         return this;
     }
 
-    addMessageContextMenus(commands: Collection<string, ContextMenuCommand<MessageContextMenuCommandInteraction>>) {
-        for (const [ name, command ] of commands) 
+    /**
+     * Add a collection of message context commands to the handler
+     * @param commands Collections of message context commands
+     * @returns the command handler
+     */
+    addMessageContextMenus(commands: Collection<string, ContextMenuCommand>) {
+        for (const [ name, command ] of commands) {
             try {
-                this.validateAplicationCommand(command, ApplicationCommandType.User);
+                this.validateApplicationCommand(command, ApplicationCommandType.User);
                 this._messageContextMenus.set(name, command);
             }
             catch (error) {
-                if (error instanceof Error || error instanceof DiscordjsError)
-                    this.client.emit(Events.Error, error);
-                else throw error;
+                this.client.emit(Events.Error, new Error(`Command "${name}" had an error: {error}`));
             }
+        }
         
         return this;
     }
@@ -127,28 +153,32 @@ export class CommandHandler {
             Snowflake,
             (RESTPostAPIChatInputApplicationCommandsJSONBody | RESTPostAPIContextMenuApplicationCommandsJSONBody)[]
         >();
-        // Get guild chat commands menues
+        // Get guild chat commands
         this.chatCommands.filter((f) => f.isGlobal === false).map((m) => {
             const json = m.toJSON();
             m.guildIds.forEach((guildId) => {
-                if (guildCommandData.has(guildId)) 
-                    guildCommandData.get(guildId)!.concat(json);
+                if (guildCommandData.has(guildId)) {
+                    guildCommandData.get(guildId)?.concat(json);
+                }
                 
-                else 
+                else {
                     guildCommandData.set(guildId, [json]);
+                }
                 
             });
 
         });
-        // Get guild context menues
+        // Get guild context
         this._userContextMenus.filter((f) => f.isGlobal === false).map((m) => {
             const json = m.toJSON();
             m.guildIds.forEach((guildId) => {
-                if (guildCommandData.has(guildId)) 
-                    guildCommandData.get(guildId)!.concat(json);
+                if (guildCommandData.has(guildId)) {
+                    guildCommandData.get(guildId)?.concat(json);
+                }
                 
-                else 
+                else {
                     guildCommandData.set(guildId, [json]);
+                }
                 
             });
         });
@@ -156,64 +186,93 @@ export class CommandHandler {
         this._messageContextMenus.filter((f) => f.isGlobal === false).map((m) => {
             const json = m.toJSON();
             m.guildIds.forEach((guildId) => {
-                if (guildCommandData.has(guildId)) 
-                    guildCommandData.get(guildId)!.concat(json);
+                if (guildCommandData.has(guildId)) {
+                    guildCommandData.get(guildId)?.concat(json);
+                }
                 
-                else 
+                else {
                     guildCommandData.set(guildId, [json]);
+                }
                 
             });
         });
         // Deploys commands buy guild
-        for (const [ guildIds, json ] of guildCommandData) 
+        for (const [ guildIds, json ] of guildCommandData) {
             await this.client.application.commands.set(json, guildIds);
-        this.client.emit(Events.Debug, `Deployed commands to ${guildCommandData.size} guilds\nCommands registered`);
+        }
+        
+        this.client.emit(Events.Debug, `Deployed commands to ${guildCommandData.size} guilds`);
+        this.client.emit(Events.Debug, 'Commands registered');
     }
     /**
-     * Deregiser commands for one or more guilds
+     * Deregister commands for one or more guilds
      * @param guildId optional Id to only remove commands from on guild
      */
     async deregisterGuildCommands(guildId?: string) {
         try {
-            if (guildId) 
+            if (guildId) {
                 await this.rest.put(Routes.applicationGuildCommands(this.client.user.id, guildId), { body: [] })
                     .then(() => this.client.emit(Events.Debug, `Successfully deleted all guild commands in ${guildId}.`))
                     .catch((e) => this.client.emit(Events.Error, e));
+            }
             
             else {
-                for ([guildId] of await (this.client.guilds.fetch())) 
+                for ([guildId] of await (this.client.guilds.fetch())) {
                     await this.rest.put(Routes.applicationGuildCommands(this.client.user.id, guildId), { body: [] })
                         .catch((e) => this.client.emit(Events.Error, e));
+                }
+                
                 this.client.emit(Events.Debug, `Successfully deleted all guild commands.`);
             }
         }
         catch (error) {
-            if (error instanceof Error || error instanceof DiscordjsError)
-                this.client.emit(Events.Error, error);
-            else throw error;
+            this.client.emit(Events.Error, error as  Error);
         }
         
     }
 
+    /**
+     * Run function for a chat command in handler
+     * @param interaction received interaction
+     * @returns The function for the interaction
+     */
     runChatCommand(interaction: ChatInputCommandInteraction) {
         return this.chatCommands.get(interaction.commandName)?.execute(interaction);
     }
 
+    /**
+     * Run function for an autocomplete interaction in handler
+     * @param interaction received interaction
+     * @returns The function for the interaction
+     */
     runAutocomplete(interaction: AutocompleteInteraction) {
-        const command = this.chatCommands.get(interaction.commandName);
-        if (command?.autocomplete !== undefined ) 
-            return command?.autocomplete(interaction);
+        const auto = this.chatCommands.get(interaction.commandName)?.autocomplete;
+        if (auto == undefined) return;
+        return auto(interaction);
     }
 
-    runUserContextMenus(interaction: UserContextMenuCommandInteraction) {
+    /**
+     * Run function for a user context command in handler
+     * @param interaction received interaction
+     * @returns The function for the interaction
+     */
+    runUserContextMenus(interaction: ContextMenuCommandInteraction) {
         return this._userContextMenus.get(interaction.commandName)?.execute(interaction);
     }
 
-    runMessageContextMenus(interaction: MessageContextMenuCommandInteraction) {
+    /**
+     * Run function for a message context command in handler
+     * @param interaction received interaction
+     * @returns The function for the interaction
+     */
+    runMessageContextMenus(interaction: ContextMenuCommandInteraction) {
         return this._messageContextMenus.get(interaction.commandName)?.execute(interaction);
     }
+    /**
+     * create a command handler
+     * @param client parent client
+     */
     constructor(client: Client) {
         this.client = client;
-        this.rest = client.rest;
     }
 }

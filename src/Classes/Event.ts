@@ -63,4 +63,8 @@ export class Event {
     }
 }
 
-export default Event;
+export interface ValidEvent extends Event {
+    name: keyof DiscordClientEvents
+    execute: (...args: any[]) => Promise<void>
+}
+

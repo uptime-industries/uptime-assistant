@@ -1,14 +1,14 @@
 import {
-    ApplicationCommandType, Colors, GuildMember, PermissionFlagsBits, UserContextMenuCommandInteraction
+    ApplicationCommandType, Colors, ContextMenuCommandType, GuildMember, InteractionContextType, PermissionFlagsBits, UserContextMenuCommandInteraction
 } from 'discord.js';
 import { ContextMenuCommand } from '../../Classes/index.js';
 import { userEmbed } from '../../features/inspect.js';
 
-export default new ContextMenuCommand<UserContextMenuCommandInteraction>()
+export default new ContextMenuCommand()
     .setBuilder((builder) => builder
-        .setName('Instpect User')
-        .setType(ApplicationCommandType.User)
-        .setDMPermission(false)
+        .setName('Inspect User')
+        .setType(ApplicationCommandType.User as ContextMenuCommandType)
+        .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages))
     .setExecute(execute);
 

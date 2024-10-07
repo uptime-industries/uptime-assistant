@@ -1,4 +1,4 @@
-import { Client } from 'discord.js';
+import { Client, Events } from 'discord.js';
 import {
     CommandHandler, EventHandler, InteractionHandler
 } from '../Handlers/index.js';
@@ -35,8 +35,8 @@ export class ExtendedClient extends Client<true> {
     // The sting that is used to split the custom id
     readonly splitCustomIDOn?: string;
 
-    // shoult the bot use the provided InteractionCreate event 
-    readonly useDefaultInterctionEvent: boolean = true;
+    // Should the bot use the provided InteractionCreate event 
+    readonly useDefaultInteractionEvent: boolean = true;
 
     // Checks if the init function has run
     private _hasInitRun = false;
@@ -65,7 +65,7 @@ export class ExtendedClient extends Client<true> {
     constructor(options: ExtendedClientOptions) {
         super(options);
 
-        this.emit('debug', 'Client starting up...');
+        this.emit(Events.Debug, 'Client starting up...');
 
         // Paths
         const {
@@ -75,16 +75,20 @@ export class ExtendedClient extends Client<true> {
             replyOnError,
             replyMessageOnError,
             splitCustomIDOn,
-            useDefaultInterctionEvent
+            useDefaultInteractionEvent: useDefaultInteractionEvent
         } = options;
 
         // Misc configuration
 
-        if (useDefaultInterctionEvent) 
+        if (useDefaultInteractionEvent) {
             this.events.add(onInteractionCreate);
+        }
         
-        else 
-            this.useDefaultInterctionEvent = false;
+        
+        else {
+            this.useDefaultInteractionEvent = false;
+        }
+        
         
         this.receiveMessageComponents = receiveMessageComponents === undefined ? false : receiveMessageComponents;
         this.receiveModals = receiveModals === undefined ? false : receiveModals;
@@ -100,8 +104,10 @@ export class ExtendedClient extends Client<true> {
      * @returns string response
      */
     public async login(token?: string) {
-        if (!token) 
+        if (!token) {
             throw new Error('[ERROR] Missing token');
+        }
+        
         
         this._hasInitRun = true;
         return super.login(token);
