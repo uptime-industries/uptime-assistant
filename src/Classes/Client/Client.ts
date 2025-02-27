@@ -33,9 +33,9 @@ export class ExtendedClient extends Client<true> {
     readonly errorMessage: string = 'There was an error while executing this interaction.';
 
     // The sting that is used to split the custom id
-    readonly splitCustomIDOn?: string;
+    readonly splitCustomIdOn?: string;
 
-    // Should the bot use the provided InteractionCreate event 
+    // should the bot use the provided InteractionCreate event 
     readonly useDefaultInteractionEvent: boolean = true;
 
     // Checks if the init function has run
@@ -74,27 +74,25 @@ export class ExtendedClient extends Client<true> {
             receiveAutocomplete,
             replyOnError,
             replyMessageOnError,
-            splitCustomIDOn,
+            splitCustomIdOn,
             useDefaultInteractionEvent: useDefaultInteractionEvent
         } = options;
 
         // Misc configuration
 
-        if (useDefaultInteractionEvent) {
+        if (useDefaultInteractionEvent) 
             this.events.add(onInteractionCreate);
-        }
         
         
-        else {
+        else 
             this.useDefaultInteractionEvent = false;
-        }
         
         
-        this.receiveMessageComponents = receiveMessageComponents === undefined ? false : receiveMessageComponents;
-        this.receiveModals = receiveModals === undefined ? false : receiveModals;
-        this.receiveAutocomplete = receiveAutocomplete === undefined ? false : receiveAutocomplete;
-        this.replyOnError = replyOnError === undefined ? false : replyOnError;
-        this.splitCustomIDOn = splitCustomIDOn || undefined;
+        this.receiveMessageComponents = receiveMessageComponents ?? false;
+        this.receiveModals = receiveModals ?? false;
+        this.receiveAutocomplete = receiveAutocomplete ?? false;
+        this.replyOnError = replyOnError ?? false;
+        this.splitCustomIdOn = splitCustomIdOn;
         if (replyMessageOnError) this.errorMessage = replyMessageOnError;
     }
 
@@ -103,12 +101,7 @@ export class ExtendedClient extends Client<true> {
      * @param token The bot's Discord token
      * @returns string response
      */
-    public async login(token?: string) {
-        if (!token) {
-            throw new Error('[ERROR] Missing token');
-        }
-        
-        
+    public async login(token?: string) {   
         this._hasInitRun = true;
         return super.login(token);
     }

@@ -9,9 +9,9 @@ export default new Interaction<ButtonInteraction>()
         const {
             customId, client, guild 
         } = interaction;
-        const { splitCustomIDOn } = client;
-        if ( splitCustomIDOn == undefined) return;
-        const args = customId.split(splitCustomIDOn);
+        const { splitCustomIdOn } = client;
+        if ( splitCustomIdOn == undefined) return;
+        const args = customId.split(splitCustomIdOn);
         const isY = args[1] == 'y';
         const isN = args[1] == 'n';
         const targetID = isY || isN ? args[2] : args[1];
@@ -54,10 +54,10 @@ export default new Interaction<ButtonInteraction>()
                 content: bold(`Are you sure you would like to moderate the nickname of ${member}`),
                 components: [new ActionRowBuilder<ButtonBuilder>()
                     .addComponents(new ButtonBuilder()
-                        .setCustomId(interaction.customId.replace(splitCustomIDOn, splitCustomIDOn + 'y' + splitCustomIDOn))
+                        .setCustomId(interaction.customId.replace(splitCustomIdOn, splitCustomIdOn + 'y' + splitCustomIdOn))
                         .setLabel('Yes')
                         .setStyle(ButtonStyle.Success), new ButtonBuilder()
-                        .setCustomId(interaction.customId.replace(splitCustomIDOn, splitCustomIDOn + 'n' + splitCustomIDOn))
+                        .setCustomId(interaction.customId.replace(splitCustomIdOn, splitCustomIdOn + 'n' + splitCustomIdOn))
                         .setLabel('No')
                         .setStyle(ButtonStyle.Danger))],
                 ephemeral: true

@@ -1,28 +1,23 @@
 import {
-    ChatInputCommandInteraction, ContextMenuCommandBuilder, ContextMenuCommandInteraction, SlashCommandBuilder,
+    ChatInputCommandInteraction, ContextMenuCommandBuilder, ContextMenuCommandInteraction,
     Snowflake
 } from 'discord.js';
-import { AnySlashCommandBuilder, ReturnableInteraction } from './types.js';
+import { AnySlashCommandBuilder } from './types.js';
 
-SlashCommandBuilder;
-
-/**
- * Slash command or context command
- */
 export class BaseCommand<
     TypeBuilder extends AnySlashCommandBuilder | ContextMenuCommandBuilder,
     TypeInteraction extends ChatInputCommandInteraction | ContextMenuCommandInteraction
 > {
     // The constructor for the registration for the command
-    protected _builder: TypeBuilder;
+    protected _builder?: TypeBuilder;
 
-    protected _guildIds: Snowflake[] = [];
+    protected _guildIds: Snowflake[];
 
     // Method that is run when command is executed
-    protected _execute: (interaction: TypeInteraction) => Promise<ReturnableInteraction> | ReturnableInteraction;
+    protected _execute?: (interaction: TypeInteraction) => void;
 
     get name() {
-        return this._builder.name;
+        return this.builder.name;
     }
 
     get isGlobal() {
@@ -32,27 +27,18 @@ export class BaseCommand<
     get guildIds() {
         return this._guildIds;
     }
-    set guildIds(ids: Snowflake[]) {
-        this._guildIds = ids;
-    }
 
     get builder() {
+        if(this._builder === undefined) throw Error('Command builder is undefined');
         return this._builder;
     }
 
-    set builder(builder: TypeBuilder) {
-        this._builder = builder;
-    }
-
     get execute() {
+        if(this._execute === undefined) throw Error('Command execute is undefined');
         return this._execute;
     }
 
-    set execute(execute: (interaction: TypeInteraction) => Promise<ReturnableInteraction> | ReturnableInteraction) {
-        this._execute = execute;
-    }
-
-    setGuildIds(... ids: Snowflake[]) {
+    setGuildIds(...ids: Snowflake[]) {
         this._guildIds = ids;
         return this;
     }
@@ -62,18 +48,26 @@ export class BaseCommand<
      * @param execute function passed in
      * @returns The modified object
      */
-    setExecute(execute: (interaction: TypeInteraction) => Promise<ReturnableInteraction> | ReturnableInteraction): this {
-        this.execute = execute;
+    setExecute(execute: (interaction: TypeInteraction) => void): this {
+        this._execute = execute;
         return this;
     }
 
+    /**
+     * This method runs validations on the data before serializing it. As such, it may throw an error if the data is invalid.
+     * @returns Serializes to API-compatible JSON data.
+     */
     toJSON() {
-        return this._builder.toJSON();
+        return this.builder.toJSON();
     }
 
-    constructor(options: Partial<BaseCommand<TypeBuilder, TypeInteraction>> = {}) {
-        if (options.guildIds) this._guildIds = options.guildIds;
-        if (options.builder) this.builder = options.builder;
-        if (options.execute) this.execute = options.execute;
+    /**
+     * Represents Slash command or context command
+     * @param options partial object 
+     */
+    constructor(options?: Partial<BaseCommand<TypeBuilder, TypeInteraction>>) {
+        this._guildIds = options?.guildIds ?? [];
+        this._builder = options?.builder;
+        this._execute = options?.execute;
     }
 }

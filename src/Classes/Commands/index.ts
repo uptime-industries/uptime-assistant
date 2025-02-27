@@ -1,8 +1,6 @@
 export { BaseCommand } from './BaseCommand.js';
 
-export { ChatInputCommand } from './ChatInputCommand.js';
+export { ChatInputCommand, ContextMenuCommand } from './Commands.js';
 
-export { ContextMenuCommand } from './ContextMenuCommand.js';
-
-export type { AnySlashCommandBuilder, ReturnableInteraction, TypeCommand, builders } from './types.js';
+export type { AnySlashCommandBuilder, builders, TypeCommand } from './types.js';
 

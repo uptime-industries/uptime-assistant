@@ -1,5 +1,5 @@
 {
-	"files.eol": "\r\n",
+	"files.eol": "\n",
 	"files.insertFinalNewline": true,
 	"editor.tabSize": 4,
 	"editor.insertSpaces": true,

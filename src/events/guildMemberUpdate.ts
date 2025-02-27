@@ -10,9 +10,9 @@ export default new Event()
     .setName(Events.GuildMemberUpdate)
     .setOnce(false)
     .setExecute(async (oldMember: GuildMember, newMember: GuildMember) => {
-        if (oldMember.pending && !newMember.pending) {
+        if (oldMember.pending && !newMember.pending) 
             memberJoin(oldMember, newMember);
-        }
+        
     });
 
 /**
@@ -22,7 +22,7 @@ export default new Event()
  */
 async function memberJoin(oldMember: GuildMember, newMember: GuildMember) {
     const channel = oldMember.guild.channels.cache.find<GuildTextBasedChannel>((c, k): c is GuildTextBasedChannel => k == welcomeChannelID && c.isTextBased());
-    if (channel !== undefined) {
+    if (channel !== undefined) 
         channel.send({
             embeds: [(await userEmbed(newMember, Colors.Green))
                 .setTitle('Member Verified')
@@ -32,5 +32,5 @@ async function memberJoin(oldMember: GuildMember, newMember: GuildMember) {
             components: [new ActionRowBuilder<ButtonBuilder>()
                 .addComponents(moderateUserButton(newMember.user))]
         });
-    }
+    
 }

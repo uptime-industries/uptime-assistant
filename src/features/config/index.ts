@@ -7,9 +7,7 @@ import { configSupport } from '../support/Interactions/config/index.js';
  * @param interaction command interaction
  */
 export async function config(interaction: ChatInputCommandInteraction): Promise<void> {
-    const {
-        options, client, guild 
-    } = interaction;
+    const { options } = interaction;
     const subcommandGroup = options.getSubcommandGroup();
     if (subcommandGroup) 
         switch (subcommandGroup) {

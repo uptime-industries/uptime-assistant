@@ -1,20 +1,20 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { ClientEvents as DiscordClientEvents } from 'discord.js';
+import { ClientEvents } from 'discord.js';
 
 /**
  * Event Class
  */
-export class Event {
+export class Event<Key extends keyof ClientEvents = any> {
     // Name of the Event
-    private _name?: keyof DiscordClientEvents;
+    private _name?: Key;
 
     // Flag if the event should only run once
     private _once: boolean;
 
     // Method to be run when the event occurs
-    private _execute?: (...args: any[]) => Promise<void>;
+    private _execute?: (...args: ClientEvents[Key]) => void;
 
     get name() {
+        if(this._name === undefined) throw Error('Invalid or missing event name.')
         return this._name;
     }
 
@@ -23,13 +23,14 @@ export class Event {
     }
 
     get execute() {
+        if(this._execute === undefined) throw Error('Invalid or missing execute function.')
         return this._execute;
     }
 
-    constructor(options: Partial<Event> = {}) {
-        if (options.name) this._name = options.name;
-        this._once = options.once || false;
-        if (options.execute) this._execute = options.execute;
+    constructor(options?: Partial<Event<Key>>) {
+        this._name = options?.name ;
+        this._once = options?.once ?? false;
+        this._execute = options?.execute;
     }
 
     /**
@@ -47,7 +48,7 @@ export class Event {
      * @param input value to set
      * @returns The modified object
      */
-    public setName(input: keyof DiscordClientEvents) {
+    public setName(input: Key) {
         this._name = input;
         return this;
     }
@@ -57,14 +58,10 @@ export class Event {
      * @param execute function passed in
      * @returns The modified object
      */
-    public setExecute(execute: (...args: any[]) => Promise<void>) {
+    public setExecute(execute: (...args: ClientEvents[Key]) => void) {
         this._execute = execute;
         return this;
     }
 }
 
-export interface ValidEvent extends Event {
-    name: keyof DiscordClientEvents
-    execute: (...args: any[]) => Promise<void>
-}
-
+export default Event;

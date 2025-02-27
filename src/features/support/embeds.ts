@@ -1,12 +1,13 @@
 import {
-    ColorResolvable, Embed, EmbedBuilder, GuildMember
+    ColorResolvable, Embed, EmbedBuilder, GuildMember,
+    inlineCode
 } from 'discord.js';
 import { Document, Types } from 'mongoose';
 import { IConfig } from '../../Modal/Config.js';
 
 /**
  * Generates embed for tickets
- * @param subject embed titile
+ * @param subject embed title
  * @param body embed description
  * @param color embed color
  * @param member member to get display url
@@ -25,7 +26,7 @@ export function newTicketEmbed(subject: string, body: string, color: ColorResolv
             },
             {
                 name: 'Status',
-                value: '\`Open\`',
+                value: inlineCode('Open'),
                 inline: true
             }
         )
@@ -47,7 +48,7 @@ export function closedTicketEmbed(embed: Embed) {
             },
             {
                 name: embed.fields[1].name,
-                value: '\`Closed\`',
+                value: inlineCode('Closed'),
                 inline: true 
             }
         )
@@ -69,7 +70,7 @@ export function reopenTicketEmbed(embed: Embed) {
             },
             {
                 name: embed.fields[1].name,
-                value: '\`Open\`',
+                value: inlineCode('Open'),
                 inline: true 
             }
         )
@@ -81,9 +82,10 @@ export function reopenTicketEmbed(embed: Embed) {
  * @param config Document from findOne
  * @returns New ticket embed builder
  */
-export function sendEmbed(config: (Document<unknown, {}, IConfig> & IConfig & { _id: Types.ObjectId; }) | null) {
+export function sendEmbed(config: (Document<unknown, object, IConfig> & IConfig & { _id: Types.ObjectId; }) | null) {
+    
     return new EmbedBuilder()
-        .setTitle(config?.support.title!)
-        .setDescription(config?.support.description!)
+        .setTitle(config?.support.title)
+        .setDescription(config?.support.description)
         .setColor(config?.support.color != undefined ? config?.support.color : null);
 }

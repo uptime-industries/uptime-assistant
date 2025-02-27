@@ -31,11 +31,11 @@ async function execute(interaction: ModalSubmitInteraction) {
     const {
         client, guild, fields, member
     } = interaction;
-    const { splitCustomIDOn } = client;
+    const { splitCustomIdOn } = client;
     if (!interaction.inGuild() || guild == null || !(member instanceof GuildMember)) return;
 
     const reportChannel = guild.channels.cache.find<AnyThreadChannel>((c, k): c is AnyThreadChannel => k == reportChannelID && c.isThread());
-    const args = splitCustomIDOn == undefined ? [interaction.customId] : interaction.customId.split(splitCustomIDOn);
+    const args = splitCustomIdOn == undefined ? [interaction.customId] : interaction.customId.split(splitCustomIdOn);
     let comment: string | undefined = fields.getTextInputValue('comment');
     if (comment.length == 0) comment = undefined;
 
@@ -103,9 +103,9 @@ function messageReportEmbed(reporter: GuildMember, message: Message, comment: st
  * @param message
  */
 function reportRow(id: Snowflake, client: Client, message?: Message) {
-    const { splitCustomIDOn } = client;
+    const { splitCustomIdOn } = client;
     const row = new ActionRowBuilder<ButtonBuilder>()
-        .addComponents(instpct.setCustomId(`inspect${splitCustomIDOn}${id}`));
+        .addComponents(instpct.setCustomId(`inspect${splitCustomIdOn}${id}`));
     if (message) 
         return row.addComponents(link.setURL(message.url));
     

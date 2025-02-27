@@ -1,7 +1,7 @@
 import {
     AnySelectMenuInteraction, ButtonInteraction, Collection, ModalSubmitInteraction
 } from 'discord.js';
-import { Client } from '../Client/index.js';
+import { Client } from '../index.js';
 import { Interaction } from '../Interaction.js';
 
 export class InteractionHandler {
@@ -51,7 +51,7 @@ export class InteractionHandler {
     }
 
     runButton(interaction: ButtonInteraction) {
-        const interactionName = this.client.splitCustomIDOn ? interaction.customId.split(this.client.splitCustomIDOn)[0] : interaction.customId;
+        const interactionName = this.client.splitCustomIdOn ? interaction.customId.split(this.client.splitCustomIdOn)[0] : interaction.customId;
         return this.buttons.get(interactionName)?.run(interaction);
     }
 
@@ -66,7 +66,7 @@ export class InteractionHandler {
     }
 
     runModal(interaction: ModalSubmitInteraction) {
-        const interactionName = this.client.splitCustomIDOn ? interaction.customId.split(this.client.splitCustomIDOn)[0] : interaction.customId;
+        const interactionName = this.client.splitCustomIdOn ? interaction.customId.split(this.client.splitCustomIdOn)[0] : interaction.customId;
         return this._modals.get(interactionName)?.run(interaction);
     }
 
@@ -81,7 +81,7 @@ export class InteractionHandler {
     }
 
     runSelectMenus(interaction: AnySelectMenuInteraction) {
-        const interactionName = this.client.splitCustomIDOn ? interaction.customId.split(this.client.splitCustomIDOn)[0] : interaction.customId;
+        const interactionName = this.client.splitCustomIdOn ? interaction.customId.split(this.client.splitCustomIdOn)[0] : interaction.customId;
         return this._selectMenus.get(interactionName)?.run(interaction);
     }
 

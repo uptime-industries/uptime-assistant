@@ -17,7 +17,7 @@ export async function setRole(interaction: ChatInputCommandInteraction, role: Ro
 
     if (!guildConfig){ 
         await interaction.reply({
-            content: 'configs not setupcontact support for help',
+            content: 'configs not setup contact support for help',
             ephemeral: true
         });
         return; 

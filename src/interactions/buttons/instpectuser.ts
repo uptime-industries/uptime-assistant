@@ -16,8 +16,8 @@ async function inspect(interaction: ButtonInteraction) {
     const {
         guild, customId, client 
     } = interaction;
-    const { splitCustomIDOn } = client;
-    const member = await guild?.members.fetch(customId.split(splitCustomIDOn!)[1]);
+    const { splitCustomIdOn } = client;
+    const member = await guild?.members.fetch(customId.split(splitCustomIdOn!)[1]);
     if (!member) 
         await interaction.reply({
             content: 'User is no longer in the server',

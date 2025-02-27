@@ -9,5 +9,5 @@ import { getEmbedModal } from '../../modals.js';
 export async function updateMessage(interaction: ChatInputCommandInteraction) {
     if (!interaction.inGuild()) return;
     const config = await Config.findOne({ guildId: interaction.guildId });
-    await interaction.showModal(getEmbedModal(config?.support.title!, config?.support.description!));
+    await interaction.showModal(getEmbedModal(config?.support.title, config?.support.description));
 }

@@ -7,7 +7,7 @@ import {
     model
 } from 'mongoose';
 
-export interface IConfig{
+export interface IConfig {
     guildId: Snowflake
     name: string
     support: {
@@ -22,7 +22,7 @@ export interface IConfig{
 
 type ConfigHydratedDocument = HydratedDocument<IConfig>;
 
-export type ConfigModel = Model<IConfig, {}, {}, {}, ConfigHydratedDocument>;
+export type ConfigModel = Model<IConfig, object, object, object, ConfigHydratedDocument>;
 
 
 const ConfigScheama = new Schema<IConfig, ConfigModel>(

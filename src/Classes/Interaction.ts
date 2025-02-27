@@ -6,17 +6,19 @@ import { Interaction as DiscordInteraction } from 'discord.js';
 export class Interaction<E extends DiscordInteraction> {
     
     // Name of Interaction
-    private _customIdPrefix: string;
+    private _customIdPrefix?: string;
 
     // Method that to run when interaction happens
-    private _run: (interaction: E) => Promise<void>;
+    private _run?: (interaction: E) => void;
 
     get customIdPrefix() {
+        if(this._customIdPrefix === undefined) throw Error('Interaction.customIdPrefix undefined');
         return this._customIdPrefix;
     }
 
-    private  set customIdPrefix(id:string) {
-        this._customIdPrefix = id;
+    get run() {
+        if(this._run === undefined) throw Error('Interaction.run undefined');
+        return this._run;
     }
 
     // eslint-disable-next-line jsdoc/require-returns
@@ -24,7 +26,7 @@ export class Interaction<E extends DiscordInteraction> {
      * @deprecated Use `customId`
      */
     get name() {
-        return this._customIdPrefix;
+        return this.customIdPrefix;
     }
 
     // eslint-disable-next-line jsdoc/require-returns
@@ -32,20 +34,12 @@ export class Interaction<E extends DiscordInteraction> {
      * @deprecated Use `run`
      */
     get execute() {
-        return this._run;
+        return this.run;
     }
 
-    get run() {
-        return this._run;
-    }
-
-    private set run(execute: (interaction: E) => Promise<void>) {
-        this._run = execute;
-    }
-
-    constructor(options: Partial<Interaction<E>> = {}) {
-        if (options.customIdPrefix) this.customIdPrefix = options.customIdPrefix;
-        if (options.run) this.run = options.run;
+    constructor(options?: Partial<Interaction<E>>) {
+        this._customIdPrefix = options?.customIdPrefix;
+        this._run = options?.run;
     }
 
     /**
@@ -55,7 +49,7 @@ export class Interaction<E extends DiscordInteraction> {
      * @returns The modified object
      */
     public setName(name: string) {
-        this.customIdPrefix = name;
+        this._customIdPrefix = name;
         return this;
     }
 
@@ -65,7 +59,7 @@ export class Interaction<E extends DiscordInteraction> {
      * @returns The modified object
      */
     public setCustomIdPrefix(customId: string) {
-        this.customIdPrefix = customId;
+        this._customIdPrefix = customId;
         return this;
     }
 
@@ -75,8 +69,8 @@ export class Interaction<E extends DiscordInteraction> {
      * @param execute function passed in
      * @returns The modified object
      */
-    public setExecute(execute: (interaction: E) => Promise<void>) {
-        this.run = execute;
+    public setExecute(execute: (interaction: E) => void) {
+        this._run = execute;
         return this;
     }
 
@@ -85,8 +79,8 @@ export class Interaction<E extends DiscordInteraction> {
      * @param run function passed in
      * @returns The modified object
      */
-    public setRun(run: (interaction: E) => Promise<void>) {
-        this.run = run;
+    public setRun(run: (interaction: E) => void) {
+        this._run = run;
         return this;
     }
 }

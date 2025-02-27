@@ -17,12 +17,12 @@ export default new ContextMenuCommand()
  * @param interaction run command
  */
 async function execute(interaction: MessageContextMenuCommandInteraction) {
-    const { splitCustomIDOn } = interaction.client;
+    const { splitCustomIdOn } = interaction.client;
     if (interaction.targetMessage.author.system || interaction.targetMessage.author.bot) {
         await interaction.reply({ content: 'This message is from a bot and can not be reported', ephemeral: true });
         return; 
     }
     
     await interaction.showModal(reportModal
-        .setCustomId(`report${splitCustomIDOn}m${splitCustomIDOn}${interaction.targetMessage.channelId}${splitCustomIDOn}${interaction.targetMessage.id}`));
+        .setCustomId(`report${splitCustomIdOn}m${splitCustomIdOn}${interaction.targetMessage.channelId}${splitCustomIdOn}${interaction.targetMessage.id}`));
 }

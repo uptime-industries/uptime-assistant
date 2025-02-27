@@ -32,7 +32,7 @@ export const createModal = new Interaction<ModalSubmitInteraction>({ customIdPre
         interaction.deferReply({ ephemeral: true });
 
         const guildConfig = await Config.findOne({ guildId });
-        const supportRole = guild?.roles.cache.get(guildConfig?.support.roleId!);
+        const supportRole = guild?.roles.cache.get(guildConfig?.support.roleId);
         const otherRole = guildConfig?.support.otherRoleId ? guild?.roles.cache.get(guildConfig?.support.otherRoleId) : undefined;
         const subject = fields.getTextInputValue('subject');
         const body = fields.getTextInputValue('body');

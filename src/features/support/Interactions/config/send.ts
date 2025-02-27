@@ -13,7 +13,7 @@ import { sendEmbed } from '../../embeds.js';
 
 /**
  * Send Support message to channel 
- * @param interaction sorce command interaction
+ * @param interaction source command interaction
  * @param targetChannel target channel for the message to be sent
  */
 export async function send(interaction: ChatInputCommandInteraction, targetChannel?: TextChannel): Promise<void> {

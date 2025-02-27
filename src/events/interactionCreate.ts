@@ -16,15 +16,15 @@ async function onInteractionCreate(interaction: Interaction) {
     if (interaction.inGuild()) {
         const { guild, guildId } = interaction;
         const guildConfig = await Config.findOne({ guildId: guildId });
-        if (!guildConfig) {
+        if (!guildConfig) 
             await Config.create({
                 guildId: guildId,
                 name: guild?.name
             });
-        }
-        else if (guildConfig.name !== guild?.name) {
+        
+        else if (guildConfig.name !== guild?.name) 
             await guildConfig.updateOne({ name: guild?.name });
-        }
+        
     }
 
     const {
@@ -63,14 +63,14 @@ async function onInteractionCreate(interaction: Interaction) {
 
             case InteractionType.MessageComponent:
                 // If the interaction is a button interaction, execute the corresponding button handler
-                if (interaction.isButton()) {
+                if (interaction.isButton()) 
                     await interactions.runButton(interaction);
-                }
+                
                 
                 // If the interaction is a select menu interaction, execute the corresponding select menu handler
-                else if (interaction.isAnySelectMenu()) {
+                else if (interaction.isAnySelectMenu()) 
                     await interactions.runSelectMenus(interaction);
-                }
+                
                 break;
             default:
                 break;
@@ -78,12 +78,12 @@ async function onInteractionCreate(interaction: Interaction) {
     }
     catch (error) {
         
-        if (error instanceof DiscordAPIError || error instanceof Error) {
+        if (error instanceof DiscordAPIError || error instanceof Error) 
             client.emit(Events.Error, error);
-        }
-        else {
+        
+        else 
             throw error;
-        }
+        
 
         // If the interaction is repliable, handle the error with a reply
         if (interaction.isRepliable() && error instanceof Error) {
@@ -91,13 +91,13 @@ async function onInteractionCreate(interaction: Interaction) {
             if (!replyOnError) return;
         
             // If the interaction is deferred, follow up with an ephemeral error message
-            if (interaction.deferred) {
+            if (interaction.deferred) 
                 await interaction.followUp({ content: errorMessage, ephemeral: true }).catch((e) => client.emit(Events.Error, e));
-            }
+            
             // If the interaction is not deferred, reply with an ephemeral error message
-            else {
+            else 
                 await interaction.reply({ content: errorMessage, ephemeral: true }).catch((e) => client.emit(Events.Error, e));
-            }
+            
 
         }
         

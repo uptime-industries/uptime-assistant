@@ -11,13 +11,13 @@ export default new ContextMenuCommand()
         .setContexts(InteractionContextType.Guild)
         .setDefaultMemberPermissions(PermissionFlagsBits.SendMessages))
     .setExecute(async (interaction: UserContextMenuCommandInteraction) => {
-        const { splitCustomIDOn } = interaction.client;
+        const { splitCustomIdOn } = interaction.client;
         if (interaction.targetUser.system || interaction.targetUser.bot) { 
             await interaction.reply({ content: 'This user is a bot and can not be reported', ephemeral: true });
             return;
         }
         
         await interaction.showModal(reportModal
-            .setCustomId(`report${splitCustomIDOn}u${splitCustomIDOn}${interaction.targetUser.id}`));
+            .setCustomId(`report${splitCustomIdOn}u${splitCustomIdOn}${interaction.targetUser.id}`));
     });
 
